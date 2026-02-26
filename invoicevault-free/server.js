@@ -1,6 +1,6 @@
 const express = require('express');
-const fs      = require('fs');
-const path    = require('path');
+const fs = require('fs');
+const path = require('path');
 
 const app = express();
 
@@ -13,12 +13,12 @@ const CANDIDATES = [
 
 function getDataDir() {
   for (const dir of CANDIDATES) {
-    try { fs.mkdirSync(dir, { recursive: true }); return dir; } catch {}
+    try { fs.mkdirSync(dir, { recursive: true }); return dir; } catch { }
   }
   throw new Error('Cannot create data directory');
 }
 
-const DATA_DIR  = getDataDir();
+const DATA_DIR = getDataDir();
 const DATA_FILE = path.join(DATA_DIR, 'invoices.json');
 
 console.log('Data directory:', DATA_DIR);
@@ -95,7 +95,7 @@ app.put('/api/invoices/:id', (req, res) => {
 app.get('/api/export', (req, res) => {
   try {
     const invoices = loadInvoices();
-    const headers = ['Invoice #','Client','Date','Year','Quarter','Month','Subtotal (CAD)','Tax HST (CAD)','Total (CAD)','Currency','File', 'Items Purchased', 'Total Quantity'];
+    const headers = ['Invoice #', 'Client', 'Date', 'Year', 'Quarter', 'Month', 'Subtotal (CAD)', 'Tax HST (CAD)', 'Total (CAD)', 'Currency', 'File', 'Items Purchased', 'Total Quantity', 'Unit Price'];
     const rows = invoices.map(inv => [
       inv.invoiceNumber, inv.clientName, inv.date, inv.year, inv.quarter,
       inv.monthName, inv.subtotal, inv.tax, inv.total, inv.currency, inv.fileName,
@@ -107,6 +107,11 @@ app.get('/api/export', (req, res) => {
       // Total Quantity — sum of all line item quantities
       (inv.lineItems && inv.lineItems.length
         ? inv.lineItems.reduce((sum, li) => sum + (li.quantity || 0), 0)
+        : ''),
+
+      // Unit Price — join all line item unit prices with " | " separator
+      (inv.lineItems && inv.lineItems.length
+        ? inv.lineItems.map(li => li.unitPrice).join(' | ')
         : '')
     ].map(v => `"${(v ?? '').toString().replace(/"/g, '""')}"`));
     const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
