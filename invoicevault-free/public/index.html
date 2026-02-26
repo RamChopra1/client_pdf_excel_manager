@@ -1052,23 +1052,53 @@
     async function readPDF(file) {
       const buf = await file.arrayBuffer();
       const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
-      let text = '';
+      let fullText = '';
+
       for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i);
         const content = await page.getTextContent();
-        // Preserve relative positions to help with column alignment
         const items = content.items;
-        let line = '', lastY = null;
+        if (!items.length) continue;
+
+        // Group by Y coordinate with 5px tolerance
+        const linesMap = {};
         for (const item of items) {
           const y = Math.round(item.transform[5]);
-          if (lastY !== null && Math.abs(y - lastY) > 5) { text += line.trim() + '\n'; line = ''; }
-          line += item.str + ' ';
-          lastY = y;
+          let foundY = Object.keys(linesMap).find(ly => Math.abs(ly - y) <= 5);
+          if (!foundY) {
+            foundY = y;
+            linesMap[foundY] = [];
+          }
+          linesMap[foundY].push(item);
         }
-        if (line.trim()) text += line.trim() + '\n';
-        text += '\n';
+
+        // Sort lines from top to bottom
+        const sortedY = Object.keys(linesMap).sort((a, b) => b - a);
+
+        for (const y of sortedY) {
+          const lineItems = linesMap[y].sort((a, b) => a.transform[4] - b.transform[4]);
+          let lineText = '';
+          let lastX = -1;
+          let lastWidth = 0;
+
+          for (const item of lineItems) {
+            const x = item.transform[4];
+            if (lastX !== -1) {
+              const gap = x - (lastX + lastWidth);
+              // Add spaces based on gap size
+              if (gap > 30) lineText += '    ';
+              else if (gap > 10) lineText += '  ';
+              else lineText += ' ';
+            }
+            lineText += item.str;
+            lastX = x;
+            lastWidth = item.width || (item.str.length * 5); // Fallback width estimation
+          }
+          if (lineText.trim()) fullText += lineText.trim() + '\n';
+        }
+        fullText += '\n';
       }
-      return text;
+      return fullText;
     }
 
     // ── Parser — tuned for GB Wholesale + general Canadian invoices ───────────────
@@ -1193,41 +1223,29 @@
       const items = [];
       const lines = text.split('\n');
 
-      // Helper to parse currency/amounts more flexibly
       const parseAmt = (s) => parseFloat((s || '').replace(/[$\s,]/g, '')) || 0;
       const isAmt = (s) => /^\d+([,.]\d+)?$/.test((s || '').replace(/[$\s,]/g, ''));
 
       for (const line of lines) {
         const cleanLine = line.trim();
-        if (!cleanLine) continue;
+        if (!cleanLine || cleanLine.includes('SUBTOTAL') || cleanLine.includes('TOTAL')) continue;
 
         // Pattern A: Qty at start, then desc, then prices (standard GB Wholesale)
-        // Matches: "520   H GO -40 WASHER FLUID 3.78L   $ 4.19   $ 2,178.80"
         const mA = cleanLine.match(/^(\d+(?:\.\d+)?)\s+(.{3,60}?)\s+[\$]?\s*([\d,]+(?:\.\d+)?)\s+[\$]?\s*([\d,]+(?:\.\d+)?)\s*$/);
         if (mA) {
-          items.push({
-            description: mA[2].trim(),
-            quantity: parseAmt(mA[1]),
-            unitPrice: parseAmt(mA[3]),
-            amount: parseAmt(mA[4])
-          });
+          items.push({ description: mA[2].trim(), quantity: parseAmt(mA[1]), unitPrice: parseAmt(mA[3]), amount: parseAmt(mA[4]) });
           continue;
         }
 
         // Pattern B: Desc at start, then qty, unit price, total at end
         const mB = cleanLine.match(/^(.{3,40}?)\s+(\d+(?:\.\d+)?)\s+[\$]?\s*([\d,]+(?:\.\d+)?)\s+[\$]?\s*([\d,]+(?:\.\d+)?)\s*$/);
         if (mB) {
-          items.push({
-            description: mB[1].trim(),
-            quantity: parseAmt(mB[2]),
-            unitPrice: parseAmt(mB[3]),
-            amount: parseAmt(mB[4])
-          });
+          items.push({ description: mB[1].trim(), quantity: parseAmt(mB[2]), unitPrice: parseAmt(mB[3]), amount: parseAmt(mB[4]) });
           continue;
         }
 
-        // Pattern C: Generic column-based (look for 3+ space separation)
-        const parts = cleanLine.split(/\s{3,}/);
+        // Pattern C: Generic column-based (look for 2+ space separation)
+        const parts = cleanLine.split(/\s{2,}/);
         if (parts.length >= 3) {
           const last = parts[parts.length - 1].trim();
           const secondLast = parts[parts.length - 2].trim();
@@ -1250,7 +1268,7 @@
             } else {
               desc = parts.slice(0, parts.length - 2).join(' ');
             }
-            if (desc.trim()) {
+            if (desc.trim() && desc.length > 2) {
               items.push({ description: desc.trim(), quantity: qty, unitPrice: price, amount: amount });
             }
           }
