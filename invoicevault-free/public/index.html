@@ -450,25 +450,63 @@ function extractLineItems(text) {
   const items = [];
   const lines = text.split('\n');
   for (const line of lines) {
+    const cleanLine = line.trim();
+    if (!cleanLine) continue;
+
     // Pattern A: "520   H GO -40 WASHER FLUID 3.78L   $ 4.19   $ 2,178.80"
     // qty at start, then description, then prices
-    const mA = line.match(/^(\d+)\s+(.{3,60}?)\s+\$?\s*([\d,]+\.\d{2})\s+\$?\s*([\d,]+\.\d{2})\s*$/);
+    const mA = cleanLine.match(/^(\d+(?:\.\d+)?)\s+(.{3,60}?)\s+\$?\s*([\d,]+\.\d{2})\s+\$?\s*([\d,]+\.\d{2})\s*$/);
     if (mA) {
-      items.push({ description: mA[2].trim(), quantity: parseFloat(mA[1]), unitPrice: parseFloat(mA[3].replace(/,/g,'')), amount: parseFloat(mA[4].replace(/,/g,'')) });
+      items.push({
+        description: mA[2].trim(),
+        quantity:    parseFloat(mA[1].replace(/,/g,'')),
+        unitPrice:   parseFloat(mA[3].replace(/,/g,'')),
+        amount:      parseFloat(mA[4].replace(/,/g,''))
+      });
       continue;
     }
+
     // Pattern B: description at start, qty, unit price, total at end
-    const mB = line.match(/^(.{3,40}?)\s+(\d+)\s+[\$]?([\d,]+\.\d{2})\s+[\$]?([\d,]+\.\d{2})\s*$/);
+    const mB = cleanLine.match(/^(.{3,40}?)\s+(\d+(?:\.\d+)?)\s+[\$]?([\d,]+\.\d{2})\s+[\$]?([\d,]+\.\d{2})\s*$/);
     if (mB) {
       items.push({
         description: mB[1].trim(),
-        quantity:    parseFloat(mB[2]),
-        unitPrice:   parseFloat(m[3].replace(/,/g,'')),
-        amount:      parseFloat(m[4].replace(/,/g,'')),
+        quantity:    parseFloat(mB[2].replace(/,/g,'')),
+        unitPrice:   parseFloat(mB[3].replace(/,/g,'')),
+        amount:      parseFloat(mB[4].replace(/,/g,''))
       });
+      continue;
+    }
+
+    // Pattern C: Generic column-based (look for 3+ space separation)
+    const parts = cleanLine.split(/\s{3,}/);
+    if (parts.length >= 3) {
+      // Check if the last part looks like an amount (e.g. 1,234.56)
+      const last = parts[parts.length - 1].replace(/[$\s,]/g, '');
+      const secondLast = parts[parts.length - 2].replace(/[$\s,]/g, '');
+      if (/^\d+\.\d{2}$/.test(last) && /^\d+\.\d{2}$/.test(secondLast)) {
+        // We likely have [Desc, Qty, Price, Amount] or [Qty, Desc, Price, Amount]
+        const amount = parseFloat(last);
+        const price = parseFloat(secondLast);
+        let qty = 1, desc = '';
+
+        if (parts.length === 4) {
+          const p0 = parts[0].replace(/,/g,'');
+          if (!isNaN(parseFloat(p0)) && !/[a-z]/i.test(p0)) {
+            qty = parseFloat(p0);
+            desc = parts[1];
+          } else {
+            desc = parts[0];
+            qty = parseFloat(parts[1].replace(/,/g,'')) || 1;
+          }
+        } else {
+          desc = parts.slice(0, parts.length - 2).join(' ');
+        }
+        items.push({ description: desc.trim(), quantity: qty, unitPrice: price, amount: amount });
+      }
     }
   }
-  return items.slice(0, 20);
+  return items.slice(0, 40);
 }
 
 const MONTHS_MAP = {january:0,february:1,march:2,april:3,may:4,june:5,july:6,august:7,september:8,october:9,november:10,december:11,jan:0,feb:1,mar:2,apr:3,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
