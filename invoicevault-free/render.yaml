@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: invoicevault
+    runtime: node
+    buildCommand: npm install
+    startCommand: npm start
+    disk:
+      name: invoicedata
+      mountPath: /opt/render/project/src/data
+      sizeGB: 1
