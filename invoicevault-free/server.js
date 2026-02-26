@@ -95,10 +95,19 @@ app.put('/api/invoices/:id', (req, res) => {
 app.get('/api/export', (req, res) => {
   try {
     const invoices = loadInvoices();
-    const headers = ['Invoice #','Client','Date','Year','Quarter','Month','Subtotal (CAD)','Tax HST (CAD)','Total (CAD)','Currency','File'];
+    const headers = ['Invoice #','Client','Date','Year','Quarter','Month','Subtotal (CAD)','Tax HST (CAD)','Total (CAD)','Currency','File', 'Items Purchased', 'Total Quantity'];
     const rows = invoices.map(inv => [
       inv.invoiceNumber, inv.clientName, inv.date, inv.year, inv.quarter,
-      inv.monthName, inv.subtotal, inv.tax, inv.total, inv.currency, inv.fileName
+      inv.monthName, inv.subtotal, inv.tax, inv.total, inv.currency, inv.fileName,
+      // Items Purchased — join all line item descriptions with " | " separator
+      (inv.lineItems && inv.lineItems.length
+        ? inv.lineItems.map(li => li.description).join(' | ')
+        : ''),
+
+      // Total Quantity — sum of all line item quantities
+      (inv.lineItems && inv.lineItems.length
+        ? inv.lineItems.reduce((sum, li) => sum + (li.quantity || 0), 0)
+        : '')
     ].map(v => `"${(v ?? '').toString().replace(/"/g, '""')}"`));
     const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
     res.setHeader('Content-Type', 'text/csv');
