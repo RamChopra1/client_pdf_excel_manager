@@ -905,6 +905,18 @@
           <div class="kpi-value" id="k-cli">0</div>
           <div class="kpi-sub">Unique</div>
         </div>
+        <div class="kpi-card-mini"
+          style="background:var(--card);border-radius:var(--radius);padding:22px 24px;box-shadow:var(--shadow-sm);border:1px solid var(--border);position:relative;overflow:hidden;border-left:4px solid var(--green)">
+          <div class="kpi-label">Gross Profit</div>
+          <div class="kpi-value" id="k-profit" style="color:var(--green)">$0</div>
+          <div class="kpi-sub">CAD · All time</div>
+        </div>
+        <div class="kpi-card-mini"
+          style="background:var(--card);border-radius:var(--radius);padding:22px 24px;box-shadow:var(--shadow-sm);border:1px solid var(--border);position:relative;overflow:hidden;border-left:4px solid var(--accent)">
+          <div class="kpi-label">Avg Margin</div>
+          <div class="kpi-value" id="k-margin" style="color:var(--accent)">0%</div>
+          <div class="kpi-sub">Weighted avg</div>
+        </div>
       </div>
       <div class="charts-grid">
         <div class="chart-card">
@@ -954,6 +966,16 @@
           <select class="filter-sel" id="moFilter" onchange="renderInvTable()">
             <option value="">All months</option>
           </select>
+          <select class="filter-sel" id="catFilter" onchange="renderInvTable()">
+            <option value="">All Categories</option>
+            <option value="Inventory">Inventory</option>
+            <option value="Utilities">Utilities</option>
+            <option value="Software">Software</option>
+            <option value="Fuel">Fuel</option>
+            <option value="Marketing">Marketing</option>
+            <option value="Rent">Rent</option>
+            <option value="General">General</option>
+          </select>
           <span class="t-count" id="tCount"></span>
         </div>
         <div id="invTableBody"></div>
@@ -991,9 +1013,26 @@
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
     // ══════════════════════════════════════════════════════
-    //  STATE
+    //  STATE & HELPERS
     // ══════════════════════════════════════════════════════
     let invoices = [];
+    const RATES = { CAD: 1, USD: 1.38, EUR: 1.48, GBP: 1.76 }; // Approx rates for normalization
+
+    function toCAD(val, cur) {
+      return val * (RATES[cur] || 1);
+    }
+
+    function checkRecurring() {
+      const clients = {};
+      invoices.forEach(i => {
+        const c = i.clientName; if (!c) return;
+        if (!clients[c]) clients[c] = new Set();
+        clients[c].add(`${i.year}-${i.month}`);
+      });
+      return Object.entries(clients)
+        .filter(([name, months]) => months.size >= 2)
+        .map(([name]) => name);
+    }
 
     async function loadData() {
       try {
@@ -1194,6 +1233,24 @@
       const currency = text.includes('HST') || text.includes('hst') ? 'CAD'
         : /£/.test(text) ? 'GBP' : /€/.test(text) ? 'EUR' : 'USD';
 
+      // ── Auto-Categorization Logic
+      const AUTO_CATEGORIES = {
+        'Inventory': ['wholesale', 'stock', 'bulk', 'pallet', 'case of', 'qty'],
+        'Utilities': ['hydro', 'gas', 'electric', 'water', 'internet', 'bell', 'rogers', 'cogeco'],
+        'Software': ['adobe', 'microsoft', 'aws', 'google', 'subscription', 'monthly fee', 'license'],
+        'Fuel': ['esso', 'petro', 'shell', 'gasoline', 'diesel', 'fuel', 'station'],
+        'Marketing': ['ads', 'facebook', 'instagram', 'promotion', 'flyer', 'print'],
+        'Rent': ['rent', 'lease', 'storage', 'warehouse'],
+      };
+
+      let category = 'General';
+      for (const [cat, keywords] of Object.entries(AUTO_CATEGORIES)) {
+        if (keywords.some(k => text.toLowerCase().includes(k))) {
+          category = cat;
+          break;
+        }
+      }
+
       // ── Line items
       const lineItems = extractLineItems(text);
 
@@ -1207,6 +1264,7 @@
         tax: tax || 0,
         total: total || 0,
         currency,
+        category,
         paymentMethod: paymentMethod || null,
         hstNumber: hstNumber || null,
         lineItems,
@@ -1394,13 +1452,44 @@
     function refresh() {
       const n = invoices.length;
       document.getElementById('invCount').textContent = n;
-      const total = invoices.reduce((s, i) => s + (i.total || 0), 0);
+      const total = invoices.reduce((s, i) => s + toCAD(i.total || 0, i.currency), 0);
       const avg = n ? total / n : 0;
       const clients = new Set(invoices.map(i => i.clientName).filter(Boolean)).size;
+
+      // Profit calculation
+      let totalProfit = 0;
+      let profitEligibleTotal = 0;
+      invoices.forEach(inv => {
+        let invProfit = 0;
+        (inv.lineItems || []).forEach(item => {
+          const qty = item.quantity || 0;
+          const price = item.unitPrice || 0;
+          const cost = item.ourPrice || 0;
+          if (cost > 0) {
+            invProfit += (qty * price) - (qty * cost);
+          }
+        });
+        totalProfit += invProfit;
+        if (invProfit !== 0) profitEligibleTotal += toCAD(inv.subtotal || 0, inv.currency);
+      });
+      const avgMargin = profitEligibleTotal ? (totalProfit / profitEligibleTotal) * 100 : 0;
+
+      // Identify recurring
+      const recurring = checkRecurring();
+      const recList = recurring.slice(0, 3).join(', ');
+
       document.getElementById('k-rev').textContent = '$' + fmt(total);
       document.getElementById('k-cnt').textContent = n;
       document.getElementById('k-avg').textContent = '$' + fmt(avg);
       document.getElementById('k-cli').textContent = clients;
+      document.getElementById('k-profit').textContent = '$' + fmt(totalProfit);
+      document.getElementById('k-margin').textContent = avgMargin.toFixed(1) + '%';
+
+      // Bonus: add recurring info to revenue subtext if any
+      if (recurring.length) {
+        document.querySelector('.kpi-card.green .kpi-sub').innerHTML = `Processed · <span title="${recurring.join(', ')}" style="color:var(--accent);cursor:help">${recurring.length} Recurring</span>`;
+      }
+
       renderBarChart(); renderCliChart(); renderRecentTable(); populateFilters();
     }
 
@@ -1447,10 +1536,12 @@
       const search = (document.getElementById('searchBox').value || '').toLowerCase();
       const yr = document.getElementById('yrFilter').value;
       const mo = document.getElementById('moFilter').value;
+      const cat = document.getElementById('catFilter').value;
       let f = invoices.filter(i => {
         if (yr && String(i.year) !== yr) return false;
         if (mo && String(i.month) !== mo) return false;
-        if (search) { const h = [i.clientName, i.invoiceNumber, i.date, i.fileName].join(' ').toLowerCase(); if (!h.includes(search)) return false; }
+        if (cat && i.category !== cat) return false;
+        if (search) { const h = [i.clientName, i.invoiceNumber, i.date, i.fileName, i.category].join(' ').toLowerCase(); if (!h.includes(search)) return false; }
         return true;
       });
       document.getElementById('tCount').textContent = `${f.length} of ${invoices.length}`;
@@ -1460,12 +1551,13 @@
     function buildTable(list, showAct) {
       if (!list.length) return emptyHTML('📄', 'No invoices yet — upload your first PDF!');
       return `<table><thead><tr>
-    <th>Invoice #</th><th>Client</th><th>Date</th><th>Quarter</th>
+    <th>Invoice #</th><th>Client</th><th>Category</th><th>Date</th><th>Quarter</th>
     <th>Subtotal (CAD)</th><th>Tax (HST)</th><th>Total (CAD)</th>${showAct ? '<th></th>' : ''}
   </tr></thead><tbody>
   ${list.map(i => `<tr style="cursor:pointer" onclick="showDetail('${i.id}')">
     <td><span class="badge bb">${i.invoiceNumber || '—'}</span></td>
     <td><strong>${i.clientName || 'Unknown'}</strong></td>
+    <td><span class="badge ${i.category === 'Inventory' ? 'bp' : i.category === 'Utilities' ? 'ba' : 'bb'}">${i.category || 'General'}</span></td>
     <td>${i.date || '—'}</td>
     <td>${i.quarter ? `<span class="badge bp">${i.quarter} ${i.year || ''}</span>` : '—'}</td>
     <td class="amt">$${fmt(i.subtotal || 0)}</td>
