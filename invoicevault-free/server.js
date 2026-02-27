@@ -67,6 +67,7 @@ const invoiceSchema = new mongoose.Schema({
     ourPrice: Number,
     amount: Number
   }],
+  category: { type: String, default: 'General' },
   rawTextPreview: String
 });
 
