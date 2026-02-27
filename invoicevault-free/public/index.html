@@ -996,8 +996,20 @@
     let invoices = [];
 
     async function loadData() {
-      try { const r = await fetch('/api/invoices'); invoices = await r.json(); }
-      catch { invoices = []; }
+      try {
+        const r = await fetch('/api/invoices');
+        const data = await r.json();
+        if (Array.isArray(data)) {
+          invoices = data;
+        } else {
+          console.error('Unexpected data from server:', data);
+          invoices = [];
+          if (data && data.error) showToast('Server Error: ' + data.error, 'err');
+        }
+      } catch (err) {
+        console.error('Load error:', err);
+        invoices = [];
+      }
       refresh();
     }
 
@@ -1316,7 +1328,14 @@
     // ══════════════════════════════════════════════════════
     async function saveToServer(inv) {
       const r = await fetch('/api/invoices', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(inv) });
-      if (!r.ok) throw new Error('Failed to save to server');
+      if (!r.ok) {
+        let msg = 'Failed to save to server';
+        try {
+          const data = await r.json();
+          if (data.error) msg = `Server Error: ${data.error}`;
+        } catch (e) { }
+        throw new Error(msg);
+      }
     }
 
     async function deleteInvoice(id) {

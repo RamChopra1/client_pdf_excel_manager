@@ -13,10 +13,34 @@ const ADMIN_PASS = process.env.ADMIN_PASSWORD || 'password123';
 const SESSION_SECRET = process.env.SESSION_SECRET || 'invoicevault_secret_88';
 
 // ── Database Connection ──────────────────────────────────────────────────────
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/invoicevault';
-mongoose.connect(MONGODB_URI)
-  .then(() => console.log('Connected to MongoDB Atlas'))
-  .catch(err => console.error('MongoDB connection error:', err));
+const MONGODB_URI = process.env.MONGODB_URI;
+
+let cachedConnection = null;
+
+async function connectToDatabase() {
+  if (cachedConnection) return cachedConnection;
+  if (!MONGODB_URI) throw new Error('MONGODB_URI is not defined in environment variables');
+
+  cachedConnection = await mongoose.connect(MONGODB_URI, {
+    bufferCommands: false, // Recommended for serverless
+  });
+  console.log('Connected to MongoDB Atlas');
+  return cachedConnection;
+}
+
+// Pre-connect globally (works for most cases)
+connectToDatabase().catch(err => console.error('Initial MongoDB connection error:', err));
+
+// Middleware to ensure DB is connected for every request
+const ensureDb = async (req, res, next) => {
+  try {
+    await connectToDatabase();
+    next();
+  } catch (err) {
+    res.status(500).json({ error: 'Database connection failed: ' + err.message });
+  }
+};
+app.use(ensureDb);
 
 // ── Schema Definition ────────────────────────────────────────────────────────
 const invoiceSchema = new mongoose.Schema({
@@ -136,8 +160,8 @@ app.post('/api/invoices', async (req, res) => {
     console.log('Saved to DB:', inv.invoiceNumber, 'for', inv.clientName);
     res.json({ ok: true });
   } catch (e) {
-    console.error('POST error:', e.message);
-    res.status(500).json({ error: e.message });
+    console.error('POST /api/invoices error:', e.message);
+    res.status(500).json({ error: e.message, code: e.code, name: e.name });
   }
 });
 
