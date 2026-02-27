@@ -3,8 +3,14 @@ const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
 const ExcelJS = require('exceljs');
+const cookieParser = require('cookie-parser');
 
 const app = express();
+
+// ── Configuration ────────────────────────────────────────────────────────────
+const ADMIN_USER = process.env.ADMIN_USERNAME || 'admin';
+const ADMIN_PASS = process.env.ADMIN_PASSWORD || 'password123';
+const SESSION_SECRET = process.env.SESSION_SECRET || 'invoicevault_secret_88';
 
 // ── Database Connection ──────────────────────────────────────────────────────
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/invoicevault';
@@ -44,7 +50,50 @@ const Invoice = mongoose.model('Invoice', invoiceSchema);
 
 // ── Middleware ────────────────────────────────────────────────────────────────
 app.use(express.json({ limit: '10mb' }));
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(cookieParser(SESSION_SECRET));
+
+// Auth check middleware
+const checkAuth = (req, res, next) => {
+  const { auth_token } = req.signedCookies;
+  if (auth_token === 'authenticated') {
+    next();
+  } else {
+    // If it's an API call, return 401. If it's a page request, redirect.
+    if (req.path.startsWith('/api/')) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    res.redirect('/login');
+  }
+};
+
+// Public routes
+app.get('/login', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'login.html'));
+});
+
+app.post('/api/login', (req, res) => {
+  const { username, password } = req.body;
+  if (username === ADMIN_USER && password === ADMIN_PASS) {
+    res.cookie('auth_token', 'authenticated', {
+      httpOnly: true,
+      signed: true,
+      maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+      sameSite: 'lax'
+    });
+    res.json({ success: true });
+  } else {
+    res.status(401).json({ error: 'Invalid credentials' });
+  }
+});
+
+app.get('/api/logout', (req, res) => {
+  res.clearCookie('auth_token');
+  res.redirect('/login');
+});
+
+// Protected routes
+app.use(checkAuth);
+app.use(express.static(path.join(__dirname, 'public'))); // Protect all static files including index.html
 app.use((req, res, next) => { console.log(req.method, req.path); next(); });
 
 // ── Routes ────────────────────────────────────────────────────────────────────
