@@ -1333,6 +1333,23 @@
         const el = document.getElementById('edit_' + f);
         if (el) body[f] = f === 'total' || f === 'subtotal' || f === 'tax' ? parseFloat(el.value) || 0 : el.value;
       });
+
+      // Collect line items
+      const rows = document.querySelectorAll('#edit_lineItemsTable tbody tr');
+      const lineItems = [];
+      rows.forEach(r => {
+        const inputs = r.querySelectorAll('input');
+        const qty = parseFloat(inputs[1].value) || 0;
+        const price = parseFloat(inputs[2].value) || 0;
+        lineItems.push({
+          description: inputs[0].value,
+          quantity: qty,
+          unitPrice: price,
+          ourPrice: parseFloat(inputs[3].value) || 0,
+          amount: +(qty * price).toFixed(2)
+        });
+      });
+      body.lineItems = lineItems;
       // Recompute date fields
       const d = parseDate(body.date);
       if (d) {
@@ -1530,8 +1547,8 @@
       <div class="full"><div class="dl">Source file</div><div class="dv" style="color:var(--muted);font-size:13px">${i.fileName || '—'}</div></div>
     </div>
     ${i.lineItems && i.lineItems.length ? `<div style="margin-top:18px"><div class="dl" style="margin-bottom:6px">Line Items</div>
-      <table class="lit"><thead><tr><th>Description</th><th>Qty</th><th>Unit Price</th><th>Amount</th></tr></thead>
-      <tbody>${i.lineItems.map(l => `<tr><td>${l.description || '—'}</td><td>${l.quantity || '—'}</td><td>$${fmt(l.unitPrice || 0)}</td><td>$${fmt(l.amount || 0)}</td></tr>`).join('')}</tbody>
+      <table class="lit"><thead><tr><th>Description</th><th>Qty</th><th>Unit Price</th><th>Our Price</th><th>Amount</th></tr></thead>
+      <tbody>${i.lineItems.map(l => `<tr><td>${l.description || '—'}</td><td>${l.quantity || '—'}</td><td>$${fmt(l.unitPrice || 0)}</td><td>$${fmt(l.ourPrice || 0)}</td><td>$${fmt(l.amount || 0)}</td></tr>`).join('')}</tbody>
       </table></div>`: ''}
     <div style="margin-top:18px;display:flex;gap:10px">
       <button class="save-btn" onclick="openEdit('${i.id}')">✏️ Edit this invoice</button>
@@ -1548,37 +1565,73 @@
       <div class="full"><div class="dl">Client Name</div><input class="edit-input" id="edit_clientName" value="${i.clientName || ''}"></div>
       <div><div class="dl">Invoice #</div><input class="edit-input" id="edit_invoiceNumber" value="${i.invoiceNumber || ''}"></div>
       <div><div class="dl">Date (YYYY-MM-DD)</div><input class="edit-input" id="edit_date" value="${i.date || ''}"></div>
-      <div><div class="dl">Subtotal ($)</div><input class="edit-input" type="number" id="edit_subtotal" value="${i.subtotal || 0}"></div>
-      <div><div class="dl">Tax ($)</div><input class="edit-input" type="number" id="edit_tax" value="${i.tax || 0}"></div>
-      <div class="full"><div class="dl">Total ($)</div><input class="edit-input" type="number" id="edit_total" value="${i.total || 0}"></div>
+      <div><div class="dl">Subtotal ($)</div><input class="edit-input" type="number" step="0.01" id="edit_subtotal" value="${i.subtotal || 0}"></div>
+      <div><div class="dl">Tax ($)</div><input class="edit-input" type="number" step="0.01" id="edit_tax" value="${i.tax || 0}"></div>
+      <div class="full"><div class="dl">Total ($)</div><input class="edit-input" type="number" step="0.01" id="edit_total" value="${i.total || 0}"></div>
     </div>
-    <button class="save-btn" onclick="saveEdit('${i.id}')">💾 Save Changes</button>`;
+    
+    <div style="margin-top:20px">
+      <div class="dl" style="margin-bottom:8px">Line Items Editor</div>
+      <table class="lit" id="edit_lineItemsTable">
+        <thead><tr><th>Description</th><th style="width:70px">Qty</th><th style="width:90px">Price</th><th style="width:90px">Our Price</th><th style="width:40px"></th></tr></thead>
+        <tbody>
+          ${(i.lineItems || []).map((l, idx) => `
+            <tr data-idx="${idx}">
+              <td><input class="edit-input" style="padding:4px" value="${l.description || ''}"></td>
+              <td><input class="edit-input" style="padding:4px" type="number" value="${l.quantity || 0}"></td>
+              <td><input class="edit-input" style="padding:4px" type="number" step="0.01" value="${l.unitPrice || 0}"></td>
+              <td><input class="edit-input" style="padding:4px" type="number" step="0.01" value="${l.ourPrice || 0}"></td>
+              <td><button class="icon-btn del" onclick="this.closest('tr').remove()">🗑</button></td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+      <button class="save-btn" style="background:#64748b; margin-top:8px; padding:6px 14px; font-size:12px" onclick="addEditRow()">+ Add Item</button>
+    </div>
+    <button class="save-btn" onclick="saveEdit('${i.id}')">💾 Save Changes</button>
+    `;
       document.getElementById('mo').classList.add('open');
+    }
+
+    function addEditRow() {
+      const tbody = document.querySelector('#edit_lineItemsTable tbody');
+      if (!tbody) return;
+      const tr = document.createElement('tr');
+      tr.innerHTML = '<td><input class="edit-input" style="padding:4px" value=""></td>' +
+        '<td><input class="edit-input" style="padding:4px" type="number" value="1"></td>' +
+        '<td><input class="edit-input" style="padding:4px" type="number" step="0.01" value="0"></td>' +
+        '<td><input class="edit-input" style="padding:4px" type="number" step="0.01" value="0"></td>' +
+        '<td><button class="icon-btn del" onclick="this.closest(\'tr\').remove()">🗑</button></td>';
+      tbody.appendChild(tr);
     }
 
     function closeMo(e) { if (e.target === document.getElementById('mo')) closeMoDirect(); }
     function closeMoDirect() { document.getElementById('mo').classList.remove('open'); }
 
     // ══════════════════════════════════════════════════════
-    //  FILTERS
+    // FILTERS
     // ══════════════════════════════════════════════════════
     function populateFilters() {
-      const MNAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+      const MNAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October',
+        'November', 'December'];
       const years = [...new Set(invoices.map(i => i.year).filter(Boolean))].sort((a, b) => b - a);
       const months = [...new Set(invoices.map(i => i.month).filter(Boolean))].sort((a, b) => a - b);
       const yf = document.getElementById('yrFilter'), mf = document.getElementById('moFilter');
       const cy = yf.value, cm = mf.value;
-      yf.innerHTML = '<option value="">All years</option>' + years.map(y => `<option value="${y}"${y == cy ? 'selected' : ''}>${y}</option>`).join('');
-      mf.innerHTML = '<option value="">All months</option>' + months.map(m => `<option value="${m}"${m == cm ? 'selected' : ''}>${MNAMES[m - 1] || m}</option>`).join('');
+      yf.innerHTML = '<option value="">All years</option>' + years.map(y => `<option value="${y}" ${y == cy ? 'selected' : ''
+        }>${y}</option>`).join('');
+      mf.innerHTML = '<option value="">All months</option>' + months.map(m => `<option value="${m}" ${m == cm ? 'selected'
+        : ''}>${MNAMES[m - 1] || m}</option>`).join('');
     }
 
     // ══════════════════════════════════════════════════════
-    //  QUEUE UI
+    // QUEUE UI
     // ══════════════════════════════════════════════════════
     function addQueueItem(id, name) {
       const el = document.createElement('div');
       el.className = 'queue-item'; el.id = id;
-      el.innerHTML = `<div class="sdot proc" id="sd_${id}"></div><span class="q-filename">📄 ${name}</span><span class="q-status" id="qs_${id}">Reading PDF...</span>`;
+      el.innerHTML = `<div class="sdot proc" id="sd_${id}"></div><span class="q-filename">📄 ${name}</span><span
+    class="q-status" id="qs_${id}">Reading PDF...</span>`;
       document.getElementById('queueList').prepend(el);
     }
     function setQStatus(id, status, msg) {
@@ -1588,11 +1641,23 @@
     }
 
     // ══════════════════════════════════════════════════════
-    //  HELPERS
+    // HELPERS
     // ══════════════════════════════════════════════════════
-    function fmt(n) { return Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
-    function fmtK(n) { if (n >= 1e6) return (n / 1e6).toFixed(1) + 'M'; if (n >= 1000) return (n / 1000).toFixed(1) + 'K'; return fmt(n); }
-    function emptyHTML(icon, msg) { return `<div class="empty"><div class="empty-icon">${icon}</div><div class="empty-sub">${msg}</div></div>`; }
+    function fmt(n) {
+      return Number(n || 0).toLocaleString('en-US', {
+        minimumFractionDigits: 2, maximumFractionDigits: 2
+      });
+    }
+    function fmtK(n) {
+      if (n >= 1e6) return (n / 1e6).toFixed(1) + 'M'; if (n >= 1000) return (n / 1000).toFixed(1) + 'K';
+      return fmt(n);
+    }
+    function emptyHTML(icon, msg) {
+      return `<div class="empty">
+    <div class="empty-icon">${icon}</div>
+    <div class="empty-sub">${msg}</div>
+  </div>`;
+    }
     function showToast(msg, type = 'ok') {
       const t = document.getElementById('toast'); t.textContent = msg; t.className = `toast ${type} show`;
       setTimeout(() => t.classList.remove('show'), 3200);

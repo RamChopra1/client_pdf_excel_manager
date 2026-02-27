@@ -1,41 +1,46 @@
+require('dotenv').config();
 const express = require('express');
-const fs = require('fs');
+const mongoose = require('mongoose');
 const path = require('path');
+const ExcelJS = require('exceljs');
 
 const app = express();
 
-// ── Pick a writable data directory ───────────────────────────────────────────
-const CANDIDATES = [
-  '/opt/render/project/src/data',   // Render paid disk mount
-  path.join(__dirname, 'data'),     // local / same folder
-  '/tmp/invoicevault_data',         // always writable fallback
-];
+// ── Database Connection ──────────────────────────────────────────────────────
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/invoicevault';
+mongoose.connect(MONGODB_URI)
+  .then(() => console.log('Connected to MongoDB Atlas'))
+  .catch(err => console.error('MongoDB connection error:', err));
 
-function getDataDir() {
-  for (const dir of CANDIDATES) {
-    try { fs.mkdirSync(dir, { recursive: true }); return dir; } catch { }
-  }
-  throw new Error('Cannot create data directory');
-}
+// ── Schema Definition ────────────────────────────────────────────────────────
+const invoiceSchema = new mongoose.Schema({
+  id: { type: String, required: true, unique: true },
+  fileName: String,
+  uploadedAt: { type: Date, default: Date.now },
+  invoiceNumber: String,
+  clientName: String,
+  date: String,
+  year: Number,
+  month: Number,
+  monthName: String,
+  quarter: String,
+  subtotal: Number,
+  tax: Number,
+  total: Number,
+  currency: String,
+  paymentMethod: String,
+  hstNumber: String,
+  lineItems: [{
+    description: String,
+    quantity: Number,
+    unitPrice: Number,
+    ourPrice: Number,
+    amount: Number
+  }],
+  rawTextPreview: String
+});
 
-const DATA_DIR = getDataDir();
-const DATA_FILE = path.join(DATA_DIR, 'invoices.json');
-
-console.log('Data directory:', DATA_DIR);
-
-if (!fs.existsSync(DATA_FILE)) {
-  fs.writeFileSync(DATA_FILE, '[]');
-  console.log('Created fresh invoices.json');
-}
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
-function loadInvoices() {
-  try { return JSON.parse(fs.readFileSync(DATA_FILE, 'utf8')); }
-  catch (e) { console.error('load error:', e.message); return []; }
-}
-function saveInvoices(data) {
-  fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
-}
+const Invoice = mongoose.model('Invoice', invoiceSchema);
 
 // ── Middleware ────────────────────────────────────────────────────────────────
 app.use(express.json({ limit: '10mb' }));
@@ -44,31 +49,42 @@ app.use((req, res, next) => { console.log(req.method, req.path); next(); });
 
 // ── Routes ────────────────────────────────────────────────────────────────────
 
-// Health check — open yourdomain.com/api/health to debug
-app.get('/api/health', (req, res) => {
-  res.json({
-    status: 'ok',
-    dataDir: DATA_DIR,
-    fileExists: fs.existsSync(DATA_FILE),
-    invoiceCount: loadInvoices().length,
-    time: new Date().toISOString()
-  });
+// Health check
+app.get('/api/health', async (req, res) => {
+  try {
+    const count = await Invoice.countDocuments();
+    res.json({
+      status: 'ok',
+      dbConnected: mongoose.connection.readyState === 1,
+      invoiceCount: count,
+      time: new Date().toISOString()
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
-app.get('/api/invoices', (req, res) => {
-  try { res.json(loadInvoices()); }
-  catch (e) { res.status(500).json({ error: e.message }); }
+app.get('/api/invoices', async (req, res) => {
+  try {
+    const invoices = await Invoice.find().sort({ uploadedAt: -1 });
+    res.json(invoices);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
-app.post('/api/invoices', (req, res) => {
+app.post('/api/invoices', async (req, res) => {
   try {
     const inv = req.body;
     if (!inv || !inv.id) return res.status(400).json({ error: 'Missing invoice id' });
-    const invoices = loadInvoices();
-    if (invoices.find(i => i.id === inv.id)) return res.json({ ok: true }); // already saved
-    invoices.unshift(inv);
-    saveInvoices(invoices);
-    console.log('Saved:', inv.invoiceNumber, 'for', inv.clientName);
+
+    // Check if exists
+    const existing = await Invoice.findOne({ id: inv.id });
+    if (existing) return res.json({ ok: true });
+
+    const newInvoice = new Invoice(inv);
+    await newInvoice.save();
+    console.log('Saved to DB:', inv.invoiceNumber, 'for', inv.clientName);
     res.json({ ok: true });
   } catch (e) {
     console.error('POST error:', e.message);
@@ -76,50 +92,116 @@ app.post('/api/invoices', (req, res) => {
   }
 });
 
-app.delete('/api/invoices/:id', (req, res) => {
-  try { saveInvoices(loadInvoices().filter(i => i.id !== req.params.id)); res.json({ ok: true }); }
-  catch (e) { res.status(500).json({ error: e.message }); }
+app.delete('/api/invoices/:id', async (req, res) => {
+  try {
+    await Invoice.findOneAndDelete({ id: req.params.id });
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
-app.put('/api/invoices/:id', (req, res) => {
+app.put('/api/invoices/:id', async (req, res) => {
   try {
-    const invoices = loadInvoices();
-    const idx = invoices.findIndex(i => i.id === req.params.id);
-    if (idx === -1) return res.status(404).json({ error: 'Not found' });
-    invoices[idx] = { ...invoices[idx], ...req.body };
-    saveInvoices(invoices);
-    res.json(invoices[idx]);
-  } catch (e) { res.status(500).json({ error: e.message }); }
+    const updated = await Invoice.findOneAndUpdate(
+      { id: req.params.id },
+      { $set: req.body },
+      { new: true }
+    );
+    if (!updated) return res.status(404).json({ error: 'Not found' });
+    res.json(updated);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
-app.get('/api/export', (req, res) => {
+app.get('/api/export', async (req, res) => {
   try {
-    const invoices = loadInvoices();
-    const headers = ['Invoice #', 'Client', 'Date', 'Year', 'Quarter', 'Month', 'Subtotal (CAD)', 'Tax HST (CAD)', 'Total (CAD)', 'Currency', 'File', 'Items Purchased', 'Total Quantity', 'Unit Price'];
-    const rows = invoices.map(inv => [
-      inv.invoiceNumber, inv.clientName, inv.date, inv.year, inv.quarter,
-      inv.monthName, inv.subtotal, inv.tax, inv.total, inv.currency, inv.fileName,
-      // Items Purchased — join all line item descriptions with " | " separator
-      (inv.lineItems && inv.lineItems.length
-        ? inv.lineItems.map(li => li.description).join(' | ')
-        : ''),
+    const invoices = await Invoice.find().sort({ uploadedAt: -1 });
+    const workbook = new ExcelJS.Workbook();
 
-      // Total Quantity — sum of all line item quantities
-      (inv.lineItems && inv.lineItems.length
-        ? inv.lineItems.reduce((sum, li) => sum + (li.quantity || 0), 0)
-        : ''),
+    const sheetsMap = {};
+    invoices.forEach(inv => {
+      const year = inv.year || new Date().getFullYear();
+      let sheetName = year.toString();
+      if (year === 2025) {
+        const month = inv.month || 1;
+        sheetName = month <= 6 ? '2025 ( JAN-JUN )' : '2025 ( JUL-DEC )';
+      }
+      if (!sheetsMap[sheetName]) sheetsMap[sheetName] = [];
+      sheetsMap[sheetName].push(inv);
+    });
 
-      // Unit Price — join all line item unit prices with " | " separator
-      (inv.lineItems && inv.lineItems.length
-        ? inv.lineItems.map(li => li.unitPrice).join(' | ')
-        : '')
-    ].map(v => `"${(v ?? '').toString().replace(/"/g, '""')}"`));
-    const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
-    res.setHeader('Content-Type', 'text/csv');
-    res.setHeader('Content-Disposition', 'attachment; filename="invoicevault_export.csv"');
-    res.send(csv);
+    if (Object.keys(sheetsMap).length === 0) sheetsMap[new Date().getFullYear().toString()] = [];
+
+    for (const [sheetName, invList] of Object.entries(sheetsMap)) {
+      const sheet = workbook.addWorksheet(sheetName);
+      sheet.mergeCells('A1:N1');
+      const titleCell = sheet.getCell('A1');
+      titleCell.value = 'ORDERS OF GREENBANK WHOLESALE';
+      titleCell.font = { bold: true, size: 20 };
+      titleCell.alignment = { horizontal: 'center' };
+
+      const headers = [
+        'S. NO.', 'INV. NO.', 'INV. DATE', 'SOLD TO', 'QUANTITY', 'PER PC.',
+        'PRODUCT', 'AMOUNT', 'TAX', 'TOTAL', 'AMT. RCD', 'OUR PRICE', 'PROFIT', 'ASIS CUT'
+      ];
+      const headerRow = sheet.getRow(2);
+      headerRow.values = headers;
+      headerRow.eachCell((cell) => {
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'C00000' } };
+        cell.font = { bold: true, color: { argb: 'FFFFFF' }, size: 12 };
+        cell.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
+      });
+
+      sheet.columns = [
+        { key: 'sno', width: 13 }, { key: 'invNo', width: 13 }, { key: 'date', width: 15 },
+        { key: 'soldTo', width: 35 }, { key: 'qty', width: 15 }, { key: 'price', width: 12 },
+        { key: 'prod', width: 35 }, { key: 'amt', width: 13 }, { key: 'tax', width: 12 },
+        { key: 'total', width: 14 }, { key: 'rcd', width: 15 }, { key: 'ourPrice', width: 17 },
+        { key: 'profit', width: 13 }, { key: 'asis', width: 13 }
+      ];
+
+      let currentRow = 9;
+      let sNo = 1;
+
+      invList.forEach(inv => {
+        const items = inv.lineItems || [];
+        const dateStr = inv.date ? inv.date.split('-').reverse().join('-') : '';
+
+        items.forEach((item, idx) => {
+          const row = sheet.getRow(currentRow);
+          const isFirst = idx === 0;
+          const qty = item.quantity || 0;
+          const unitPrice = item.unitPrice || 0;
+          const ourPrice = item.ourPrice || 0;
+          const amount = +(qty * unitPrice).toFixed(2);
+          const profit = +(amount - (qty * ourPrice)).toFixed(2);
+          const asisCut = +(profit / 2).toFixed(2);
+
+          row.values = [
+            isFirst ? sNo : '', isFirst ? inv.invoiceNumber : '', isFirst ? dateStr : '',
+            isFirst ? inv.clientName : '', qty, unitPrice, item.description,
+            amount, isFirst ? (inv.tax || 0) : '', isFirst ? (inv.total || 0) : '',
+            isFirst ? (inv.total || 0) : '', ourPrice, profit, asisCut
+          ];
+
+          ['F', 'H', 'I', 'J', 'K', 'L', 'M', 'N'].forEach(col => {
+            const cell = row.getCell(col);
+            if (cell.value !== '') cell.numFmt = '#,##0.00';
+          });
+          currentRow++;
+        });
+        sNo++;
+      });
+    }
+
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename="invoicevault_export.xlsx"');
+    await workbook.xlsx.write(res);
+    res.end();
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`InvoiceVault running on port ${PORT}, data in ${DATA_DIR}`));
+app.listen(PORT, () => console.log(`InvoiceVault running on port ${PORT}`));
