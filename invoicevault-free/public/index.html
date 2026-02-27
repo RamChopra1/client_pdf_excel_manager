@@ -30,6 +30,21 @@
       --radius-sm: 8px;
     }
 
+    [data-theme="dark"] {
+      --ink: #f0f6fc;
+      --ink3: #c9d1d9;
+      --surface: #0d1117;
+      --card: #161b22;
+      --border: #30363d;
+      --header-bg: #010409;
+      --accent: #58a6ff;
+      --accent2: #1f6feb;
+      --muted: #8b949e;
+      --tag-bg: #0d1117;
+      --tag-txt: #58a6ff;
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, .5);
+    }
+
     * {
       box-sizing: border-box;
       margin: 0;
@@ -41,12 +56,13 @@
       background: var(--surface);
       color: var(--ink);
       min-height: 100vh;
-      font-size: 15px
+      font-size: 15px;
+      transition: background 0.3s, color 0.3s;
     }
 
     /* ── HEADER ── */
     header {
-      background: var(--ink);
+      background: var(--header-bg, var(--ink));
       padding: 0 32px;
       display: flex;
       align-items: center;
@@ -55,7 +71,8 @@
       position: sticky;
       top: 0;
       z-index: 100;
-      box-shadow: 0 2px 12px rgba(0, 0, 0, .3)
+      box-shadow: 0 2px 12px rgba(0, 0, 0, .3);
+      border-bottom: 1px solid var(--border);
     }
 
     .logo {
@@ -117,11 +134,14 @@
 
     /* ── TABS ── */
     .nav-tabs {
-      background: var(--card);
+      background: var(--header-bg, #fff);
       border-bottom: 1px solid var(--border);
       padding: 0 32px;
       display: flex;
-      overflow-x: auto
+      overflow-x: auto;
+      position: sticky;
+      top: 62px;
+      z-index: 90;
     }
 
     .nav-tab {
@@ -140,7 +160,8 @@
     }
 
     .nav-tab:hover {
-      color: var(--ink)
+      color: var(--ink);
+      background: var(--tag-bg);
     }
 
     .nav-tab.active {
@@ -186,7 +207,7 @@
       box-shadow: var(--shadow-sm);
       border: 1px solid var(--border);
       position: relative;
-      overflow: hidden
+      overflow: hidden;
     }
 
     .kpi-card::before {
@@ -195,7 +216,7 @@
       top: 0;
       left: 0;
       width: 4px;
-      height: 100%
+      height: 100%;
     }
 
     .kpi-card.blue::before {
@@ -212,6 +233,24 @@
 
     .kpi-card.purple::before {
       background: var(--purple)
+    }
+
+    .kpi-card-mini {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 22px 24px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .kpi-card-mini.green {
+      border-left: 4px solid var(--green);
+    }
+
+    .kpi-card-mini.blue {
+      border-left: 4px solid var(--accent);
     }
 
     .kpi-label {
@@ -234,6 +273,24 @@
     .kpi-sub {
       font-size: 12px;
       color: var(--muted)
+    }
+
+    .kpi-card-mini {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 22px 24px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .kpi-card-mini.green {
+      border-left: 4px solid var(--green);
+    }
+
+    .kpi-card-mini.blue {
+      border-left: 4px solid var(--accent);
     }
 
     /* ── CHARTS ── */
@@ -538,7 +595,7 @@
     }
 
     thead {
-      background: #f8fafc
+      background: var(--surface)
     }
 
     th {
@@ -549,14 +606,14 @@
       letter-spacing: .6px;
       color: var(--muted);
       text-align: left;
-      border-bottom: 1px solid var(--border);
+      border-bottom: 2px solid var(--border);
       white-space: nowrap
     }
 
     td {
       padding: 12px 15px;
       font-size: 14px;
-      border-bottom: 1px solid #f1f5f9;
+      border-bottom: 1px solid var(--border);
       vertical-align: middle
     }
 
@@ -565,35 +622,64 @@
     }
 
     tr:hover td {
-      background: #fafbfc
+      background: var(--tag-bg)
     }
 
     .badge {
       display: inline-block;
-      padding: 2px 10px;
+      padding: 3px 10px;
       border-radius: 20px;
-      font-size: 12px;
-      font-weight: 500
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
     }
 
     .bb {
-      background: #eff6ff;
-      color: #1d4ed8
+      background: var(--tag-bg);
+      color: var(--accent);
+      border: 1px solid var(--border);
     }
 
     .bg {
-      background: #f0fdf4;
-      color: #15803d
+      background: var(--tag-bg);
+      color: var(--green);
+      border: 1px solid var(--border);
     }
 
     .bp {
-      background: #f5f3ff;
-      color: #6d28d9
+      background: var(--tag-bg);
+      color: var(--purple);
+      border: 1px solid var(--border);
     }
 
     .ba {
+      background: var(--tag-bg);
+      color: var(--amber);
+      border: 1px solid var(--border);
+    }
+
+    [data-theme="light"] .bb {
+      background: #eff6ff;
+      color: #1d4ed8;
+      border: none;
+    }
+
+    [data-theme="light"] .bg {
+      background: #f0fdf4;
+      color: #15803d;
+      border: none;
+    }
+
+    [data-theme="light"] .bp {
+      background: #f5f3ff;
+      color: #6d28d9;
+      border: none;
+    }
+
+    [data-theme="light"] .ba {
       background: #fffbeb;
-      color: #92400e
+      color: #92400e;
+      border: none;
     }
 
     .amt {
@@ -856,6 +942,133 @@
         font-size: 22px
       }
     }
+
+    /* ── SEARCH OVERLAY ── */
+    .search-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      display: none;
+      align-items: flex-start;
+      justify-content: center;
+      padding-top: 100px;
+    }
+
+    .search-modal {
+      background: var(--card);
+      width: 600px;
+      max-width: 90vw;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .search-input-wrap {
+      padding: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .search-overlay-input {
+      width: 100%;
+      background: none;
+      border: none;
+      font-size: 18px;
+      color: var(--ink);
+      outline: none;
+      font-family: inherit;
+    }
+
+    .search-results {
+      max-height: 400px;
+      overflow-y: auto;
+      padding: 10px;
+    }
+
+    .search-item {
+      padding: 12px 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      border-radius: var(--radius-sm);
+      transition: 0.2s;
+    }
+
+    .search-item:hover {
+      background: var(--tag-bg);
+    }
+
+    .search-item-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .search-item-title {
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .search-item-sub {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* ── BATCH BAR ── */
+    .batch-bar {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: var(--ink);
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 50px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      box-shadow: var(--shadow-lg);
+      transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      z-index: 500;
+    }
+
+    .batch-bar.show {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .batch-count {
+      font-weight: 700;
+      font-family: 'Syne', sans-serif;
+      font-size: 14px;
+      border-right: 1px solid rgba(255, 255, 255, 0.2);
+      padding-right: 15px;
+    }
+
+    .batch-btn {
+      background: none;
+      border: none;
+      color: #fff;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      opacity: 0.9;
+      transition: 0.2s;
+    }
+
+    .batch-btn:hover {
+      opacity: 1;
+      transform: scale(1.05);
+    }
+
+    .batch-btn.red:hover {
+      color: #f87171;
+    }
   </style>
 </head>
 
@@ -866,6 +1079,7 @@
       <div class="logo-icon">📁</div>InvoiceVault
     </div>
     <div class="hdr-right">
+      <button class="hdr-btn" onclick="toggleTheme()" id="themeBtn" style="font-size:16px">🌓</button>
       <a class="hdr-btn primary" href="/api/export">⬇ Export CSV</a>
       <a class="hdr-btn" href="/api/logout" style="background:var(--red);border-color:var(--red)">🔒 Logout</a>
     </div>
@@ -905,14 +1119,12 @@
           <div class="kpi-value" id="k-cli">0</div>
           <div class="kpi-sub">Unique</div>
         </div>
-        <div class="kpi-card-mini"
-          style="background:var(--card);border-radius:var(--radius);padding:22px 24px;box-shadow:var(--shadow-sm);border:1px solid var(--border);position:relative;overflow:hidden;border-left:4px solid var(--green)">
+        <div class="kpi-card-mini green">
           <div class="kpi-label">Gross Profit</div>
           <div class="kpi-value" id="k-profit" style="color:var(--green)">$0</div>
           <div class="kpi-sub">CAD · All time</div>
         </div>
-        <div class="kpi-card-mini"
-          style="background:var(--card);border-radius:var(--radius);padding:22px 24px;box-shadow:var(--shadow-sm);border:1px solid var(--border);position:relative;overflow:hidden;border-left:4px solid var(--accent)">
+        <div class="kpi-card-mini blue">
           <div class="kpi-label">Avg Margin</div>
           <div class="kpi-value" id="k-margin" style="color:var(--accent)">0%</div>
           <div class="kpi-sub">Weighted avg</div>
@@ -920,12 +1132,12 @@
       </div>
       <div class="charts-grid">
         <div class="chart-card">
-          <div class="chart-title">Monthly Revenue</div>
-          <div class="bar-chart" id="barChart"></div>
+          <div class="chart-title">Revenue Overview</div>
+          <div style="height:200px"><canvas id="revChart"></canvas></div>
         </div>
         <div class="chart-card">
-          <div class="chart-title">Top Clients</div>
-          <div id="cliChart"></div>
+          <div class="chart-title">Category Distribution</div>
+          <div style="height:200px"><canvas id="catDistChart"></canvas></div>
         </div>
       </div>
       <div class="stitle">Recent Invoices</div>
@@ -1005,12 +1217,64 @@
     </div>
   </div>
 
+  <!-- Command+K Search Overlay -->
+  <div class="search-overlay" id="searchOverlay" onclick="closeSearch(event)">
+    <div class="search-modal" onclick="event.stopPropagation()">
+      <div class="search-input-wrap">
+        <input type="text" class="search-overlay-input" id="searchOverlayInput"
+          placeholder="Search invoices, clients, items... (Esc to close)" oninput="handleGlobalSearch()">
+      </div>
+      <div class="search-results" id="searchResults">
+        <div style="padding:40px; text-align:center; color:var(--muted)">Type something to start searching...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Batch Actions Bar -->
+  <div class="batch-bar" id="batchBar">
+    <div class="batch-count" id="batchCount">0 selected</div>
+    <button class="batch-btn" onclick="bulkExport()">📥 Export Selected</button>
+    <button class="batch-btn red" onclick="bulkDelete()">🗑 Delete Selected</button>
+    <button class="batch-btn" onclick="clearSelection()" style="color:var(--muted)">Cancel</button>
+  </div>
+
   <div class="toast" id="toast"></div>
 
-  <!-- pdf.js from CDN -->
+  <!-- pdf.js and Chart.js from CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+    // ══════════════════════════════════════════════════════
+    //  THEME & CHARTS
+    // ══════════════════════════════════════════════════════
+    let revChart, catDistChart;
+
+    function initTheme() {
+      const saved = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', saved);
+      updateChartColors();
+    }
+    initTheme();
+
+    function toggleTheme() {
+      const cur = document.documentElement.getAttribute('data-theme');
+      const next = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+      if (revChart) updateChartColors();
+    }
+
+    function updateChartColors() {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      const color = isDark ? '#8b949e' : '#64748b';
+      const grid = isDark ? '#30363d' : '#e2e8f0';
+      Chart.defaults.color = color;
+      Chart.defaults.borderColor = grid;
+      if (revChart) revChart.update();
+      if (catDistChart) catDistChart.update();
+    }
 
     // ══════════════════════════════════════════════════════
     //  STATE & HELPERS
@@ -1490,42 +1754,177 @@
         document.querySelector('.kpi-card.green .kpi-sub').innerHTML = `Processed · <span title="${recurring.join(', ')}" style="color:var(--accent);cursor:help">${recurring.length} Recurring</span>`;
       }
 
-      renderBarChart(); renderCliChart(); renderRecentTable(); populateFilters();
+      renderCharts(); renderRecentTable(); populateFilters(); updateSelection();
     }
 
-    function renderBarChart() {
-      const el = document.getElementById('barChart');
-      if (!invoices.length) { el.innerHTML = emptyHTML('📈', 'No data yet'); return; }
-      const map = {};
+    function renderCharts() {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      if (!invoices.length) return;
+
+      // 1. Revenue Chart (Last 12 Months)
+      const revData = {};
       invoices.forEach(i => {
         if (!i.year || !i.month) return;
         const k = `${i.year}-${String(i.month).padStart(2, '0')}`;
-        if (!map[k]) map[k] = { label: (i.monthName || '').slice(0, 3) + ' ' + i.year, total: 0 };
-        map[k].total += i.total || 0;
+        revData[k] = (revData[k] || 0) + toCAD(i.total || 0, i.currency);
       });
-      const sorted = Object.values(map).sort((a, b) => a.label < b.label ? -1 : 1).slice(-12);
-      const maxV = Math.max(...sorted.map(m => m.total)) || 1;
-      el.innerHTML = sorted.map(m => `
-    <div class="bar-col">
-      <div class="bar-val">$${fmtK(m.total)}</div>
-      <div class="bar" style="height:${Math.max(6, (m.total / maxV) * 130)}px" title="${m.label}: $${fmt(m.total)}"></div>
-      <div class="bar-label">${m.label}</div>
-    </div>`).join('');
+      const sortedKeys = Object.keys(revData).sort().slice(-12);
+      const labels = sortedKeys.map(k => {
+        const [y, m] = k.split('-');
+        return ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][parseInt(m) - 1] + ' ' + y;
+      });
+      const values = sortedKeys.map(k => revData[k]);
+
+      const ctxRev = document.getElementById('revChart');
+      if (!ctxRev) return;
+      if (revChart) revChart.destroy();
+      revChart = new Chart(ctxRev.getContext('2d'), {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+            label: 'Revenue (CAD)',
+            data: values,
+            borderColor: '#2563eb',
+            backgroundColor: 'rgba(37, 99, 235, 0.1)',
+            fill: true,
+            tension: 0.4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, grid: { color: isDark ? '#30363d' : '#e2e8f0' } },
+            x: { grid: { display: false } }
+          }
+        }
+      });
+
+      // 2. Category Chart
+      const catData = {};
+      invoices.forEach(i => {
+        const c = i.category || 'General';
+        catData[c] = (catData[c] || 0) + toCAD(i.total || 0, i.currency);
+      });
+
+      const ctxCat = document.getElementById('catDistChart');
+      if (!ctxCat) return;
+      if (catDistChart) catDistChart.destroy();
+      catDistChart = new Chart(ctxCat.getContext('2d'), {
+        type: 'doughnut',
+        data: {
+          labels: Object.keys(catData),
+          datasets: [{
+            data: Object.values(catData),
+            backgroundColor: ['#2563eb', '#059669', '#d97706', '#7c3aed', '#dc2626', '#64748b']
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: 'right', labels: { color: isDark ? '#8b949e' : '#64748b' } } }
+        }
+      });
     }
 
-    function renderCliChart() {
-      const el = document.getElementById('cliChart');
-      if (!invoices.length) { el.innerHTML = emptyHTML('👥', 'No data yet'); return; }
-      const map = {};
-      invoices.forEach(i => { const c = i.clientName || 'Unknown'; map[c] = (map[c] || 0) + (i.total || 0); });
-      const sorted = Object.entries(map).sort((a, b) => b[1] - a[1]).slice(0, 7);
-      const maxV = sorted[0]?.[1] || 1;
-      el.innerHTML = sorted.map(([name, amt]) => `
-    <div class="client-row">
-      <div class="client-name">${name}</div>
-      <div class="client-bar-wrap"><div class="client-bar-fill" style="width:${(amt / maxV) * 100}%"></div></div>
-      <div class="client-amount">$${fmt(amt)}</div>
-    </div>`).join('');
+    // ══════════════════════════════════════════════════════
+    //  GLOBAL SEARCH (COMMAND+K)
+    // ══════════════════════════════════════════════════════
+    window.addEventListener('keydown', e => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        openSearch();
+      }
+      if (e.key === 'Escape') closeSearch();
+    });
+
+    function openSearch() {
+      document.getElementById('searchOverlay').style.display = 'flex';
+      document.getElementById('searchOverlayInput').focus();
+    }
+    function closeSearch(e) {
+      if (!e || e.target.id === 'searchOverlay' || e.key === 'Escape') {
+        document.getElementById('searchOverlay').style.display = 'none';
+      }
+    }
+
+    function handleGlobalSearch() {
+      const query = document.getElementById('searchOverlayInput').value.toLowerCase();
+      const resultsEl = document.getElementById('searchResults');
+      if (!query.trim()) {
+        resultsEl.innerHTML = '<div style="padding:40px; text-align:center; color:var(--muted)">Type to search...</div>';
+        return;
+      }
+
+      const matches = invoices.filter(i => {
+        const h = [i.clientName, i.invoiceNumber, i.category, ...(i.lineItems || []).map(l => l.description)].join(' ').toLowerCase();
+        return h.includes(query);
+      }).slice(0, 10);
+
+      if (!matches.length) {
+        resultsEl.innerHTML = '<div style="padding:40px; text-align:center; color:var(--muted)">No matches found</div>';
+        return;
+      }
+
+      resultsEl.innerHTML = matches.map(i => `
+            <div class="search-item" onclick="closeSearch(); showDetail('${i.id}')">
+                <div class="search-item-info">
+                    <div class="search-item-title">${i.clientName || 'Unknown'} - ${i.invoiceNumber || 'No #'}</div>
+                    <div class="search-item-sub">${i.category} • ${i.date || 'No date'}</div>
+                </div>
+                <div style="font-weight:700; color:var(--green)">$${fmt(i.total)}</div>
+            </div>
+        `).join('');
+    }
+
+    // ══════════════════════════════════════════════════════
+    //  BATCH ACTIONS
+    // ══════════════════════════════════════════════════════
+    let selectedIds = new Set();
+
+    function toggleSelect(id, e) {
+      if (e) e.stopPropagation();
+      if (selectedIds.has(id)) selectedIds.delete(id);
+      else selectedIds.add(id);
+      updateSelection();
+    }
+
+    function updateSelection() {
+      const bar = document.getElementById('batchBar');
+      const count = document.getElementById('batchCount');
+      if (selectedIds.size > 0) {
+        bar.classList.add('show');
+        count.textContent = `${selectedIds.size} selected`;
+      } else {
+        bar.classList.remove('show');
+      }
+      // Force re-render table to show checked state if needed, 
+      // but for now we'll just handle it via the buildTable update
+    }
+
+    function clearSelection() {
+      selectedIds.clear();
+      updateSelection();
+      renderInvTable();
+    }
+
+    async function bulkDelete() {
+      if (!confirm(`Delete ${selectedIds.size} invoices permanently?`)) return;
+      const ids = Array.from(selectedIds);
+      for (const id of ids) {
+        await fetch('/api/invoices/' + id, { method: 'DELETE' });
+      }
+      invoices = invoices.filter(i => !selectedIds.has(i.id));
+      selectedIds.clear();
+      refresh(); renderInvTable();
+      showToast('Bulk delete complete', 'ok');
+    }
+
+    function bulkExport() {
+      showToast('Exporting selection... (Simulated)', 'ok');
+      // Real implementation would need a POST endpoint for IDs
     }
 
     function renderRecentTable() {
@@ -1551,10 +1950,14 @@
     function buildTable(list, showAct) {
       if (!list.length) return emptyHTML('📄', 'No invoices yet — upload your first PDF!');
       return `<table><thead><tr>
+    ${showAct ? '<th style="width:40px"></th>' : ''}
     <th>Invoice #</th><th>Client</th><th>Category</th><th>Date</th><th>Quarter</th>
     <th>Subtotal (CAD)</th><th>Tax (HST)</th><th>Total (CAD)</th>${showAct ? '<th></th>' : ''}
   </tr></thead><tbody>
-  ${list.map(i => `<tr style="cursor:pointer" onclick="showDetail('${i.id}')">
+  ${list.map(i => `<tr style="cursor:pointer" onclick="showDetail('${i.id}')" class="${selectedIds.has(i.id) ? 'selected-row' : ''}">
+    ${showAct ? `<td onclick="event.stopPropagation()">
+        <input type="checkbox" ${selectedIds.has(i.id) ? 'checked' : ''} onchange="toggleSelect('${i.id}')" style="width:16px; height:16px; cursor:pointer">
+    </td>` : ''}
     <td><span class="badge bb">${i.invoiceNumber || '—'}</span></td>
     <td><strong>${i.clientName || 'Unknown'}</strong></td>
     <td><span class="badge ${i.category === 'Inventory' ? 'bp' : i.category === 'Utilities' ? 'ba' : 'bb'}">${i.category || 'General'}</span></td>
