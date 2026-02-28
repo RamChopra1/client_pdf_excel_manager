@@ -565,7 +565,9 @@
       font-size: 14px;
       width: 220px;
       outline: none;
-      transition: .2s
+      transition: .2s;
+      background: var(--card);
+      color: var(--ink);
     }
 
     .search-box:focus {
@@ -580,6 +582,7 @@
       font-size: 14px;
       outline: none;
       background: var(--card);
+      color: var(--ink);
       cursor: pointer
     }
 
@@ -623,6 +626,11 @@
 
     tr:hover td {
       background: var(--tag-bg)
+    }
+
+    tr.selected-row td {
+      background: var(--tag-bg);
+      border-bottom-color: var(--accent);
     }
 
     .badge {
@@ -1023,14 +1031,15 @@
       bottom: 24px;
       left: 50%;
       transform: translateX(-50%) translateY(100px);
-      background: var(--ink);
+      background: #000;
       color: #fff;
       padding: 12px 24px;
       border-radius: 50px;
       display: flex;
       align-items: center;
       gap: 20px;
-      box-shadow: var(--shadow-lg);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
       z-index: 500;
     }
@@ -1399,16 +1408,16 @@
 
           for (const item of lineItems) {
             const x = item.transform[4];
+            const str = (item.str || '').replace(/\u00A0/g, ' ');
             if (lastX !== -1) {
               const gap = x - (lastX + lastWidth);
-              // Add spaces based on gap size
-              if (gap > 30) lineText += '    ';
+              if (gap > 40) lineText += '        '; // 8 spaces for major gaps
               else if (gap > 10) lineText += '  ';
               else lineText += ' ';
             }
-            lineText += item.str;
+            lineText += str;
             lastX = x;
-            lastWidth = item.width || (item.str.length * 5); // Fallback width estimation
+            lastWidth = item.width || (str.length * 5);
           }
           if (lineText.trim()) fullText += lineText.trim() + '\n';
         }
@@ -1436,15 +1445,50 @@
         /#\s*([0-9]{3,10})\b/,
       ]);
 
-      // ── Client name
-      // Handles: "Bill To : PIONEER", "Bill To: Acme Corp"
-      const clientName = find([
-        /bill\s+to\s*[:\s]+([^\n]{2,200})/i,
-        /bill(?:ed)?\s+to[:\s]*\n\s*([^\n]{2,200})/i,
-        /client\s*[:\-]\s*([^\n]{2,200})/i,
-        /customer\s*[:\-]\s*([^\n]{2,200})/i,
-        /sold\s+to[:\s]*\n?\s*([^\n]{2,200})/i,
-      ]);
+      // ── Client name / Address
+      // Handles: "Bill To : Acme Corp\n123 Main St", "Bill To: Acme Corp   Date: ..."
+      const extractClient = () => {
+        const labels = [/bill\s+to/i, /sold\s+to/i, /client/i, /customer\s*[:\-]/i, /billed\s+to/i];
+        const lines = text.split('\n');
+
+        const cleanAddressLine = (s) => {
+          let line = (s || '').trim();
+          if (!line) return '';
+          // Using 8 spaces as the threshold for a second column, matching readPDF update
+          if (line.includes('        ')) line = line.split('        ')[0].trim();
+          const fields = [/invoice\s*#?/i, /date\s*[:\-]/i, /phone\s*[:\-]/i, /fax\s*[:\-]/i, /page\s*[:\-]/i, /hst\s*[:\-]/i];
+          for (const f of fields) {
+            const fm = line.match(new RegExp('(.*?)' + f.source, 'i'));
+            if (fm) line = fm[1].trim();
+          }
+          return line.replace(/,$/, '').trim();
+        };
+
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i];
+          for (const label of labels) {
+            const m = line.match(new RegExp(label.source + '[:\\s]*(.*)', 'i'));
+            if (m) {
+              let firstPart = cleanAddressLine(m[1]);
+              let resultParts = firstPart ? [firstPart] : [];
+              let j = i + 1;
+              while (j < lines.length && j < i + 6) {
+                const cleaned = cleanAddressLine(lines[j]);
+                if (!cleaned || cleaned.length < 2 || /total/i.test(cleaned) || /tax/i.test(cleaned) || /subtotal/i.test(cleaned) || /ship\s+to/i.test(cleaned) || /payment/i.test(cleaned) || /due/i.test(cleaned) || /hst\s*#/i.test(cleaned)) break;
+                if (cleaned.match(/^\d+[\s.]{2,}/)) break; // Likely a line item
+                if (/^\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4}$/.test(cleaned)) break;
+                resultParts.push(cleaned);
+                j++;
+              }
+              const full = resultParts.filter(p => !labels.some(l => l.test(p))).join(', ');
+              if (full.length > 2) return full;
+            }
+          }
+        }
+        return null;
+      };
+
+      const clientName = extractClient();
 
       // ── Date
       // Your format is DD/MM/YYYY (05/02/2026 = Feb 5). We detect this.
@@ -1891,6 +1935,28 @@
       updateSelection();
     }
 
+    function toggleSelectAll(e) {
+      const isChecked = e.target.checked;
+      const checkboxes = document.querySelectorAll('#invTableBody input[type="checkbox"]');
+
+      // Get all current visible invoice IDs from the table
+      const visibleRows = document.querySelectorAll('#invTableBody tr[data-id]');
+
+      if (isChecked) {
+        visibleRows.forEach(row => {
+          const id = row.getAttribute('data-id');
+          if (id) selectedIds.add(id);
+        });
+      } else {
+        visibleRows.forEach(row => {
+          const id = row.getAttribute('data-id');
+          if (id) selectedIds.delete(id);
+        });
+      }
+
+      renderInvTable(); // Re-render to show selected states
+    }
+
     function updateSelection() {
       const bar = document.getElementById('batchBar');
       const count = document.getElementById('batchCount');
@@ -1949,12 +2015,16 @@
 
     function buildTable(list, showAct) {
       if (!list.length) return emptyHTML('📄', 'No invoices yet — upload your first PDF!');
+      const allSelected = list.length > 0 && list.every(i => selectedIds.has(i.id));
+
       return `<table><thead><tr>
-    ${showAct ? '<th style="width:40px"></th>' : ''}
+    ${showAct ? `<th style="width:40px">
+        <input type="checkbox" ${allSelected ? 'checked' : ''} onclick="toggleSelectAll(event)" title="Select All" style="width:16px; height:16px; cursor:pointer">
+    </th>` : ''}
     <th>Invoice #</th><th>Client</th><th>Category</th><th>Date</th><th>Quarter</th>
     <th>Subtotal (CAD)</th><th>Tax (HST)</th><th>Total (CAD)</th>${showAct ? '<th></th>' : ''}
   </tr></thead><tbody>
-  ${list.map(i => `<tr style="cursor:pointer" onclick="showDetail('${i.id}')" class="${selectedIds.has(i.id) ? 'selected-row' : ''}">
+  ${list.map(i => `<tr style="cursor:pointer" onclick="showDetail('${i.id}')" data-id="${i.id}" class="${selectedIds.has(i.id) ? 'selected-row' : ''}">
     ${showAct ? `<td onclick="event.stopPropagation()">
         <input type="checkbox" ${selectedIds.has(i.id) ? 'checked' : ''} onchange="toggleSelect('${i.id}')" style="width:16px; height:16px; cursor:pointer">
     </td>` : ''}
