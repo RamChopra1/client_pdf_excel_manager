@@ -22,7 +22,7 @@ async function connectToDatabase() {
   if (!MONGODB_URI) throw new Error('MONGODB_URI is not defined in environment variables');
 
   cachedConnection = await mongoose.connect(MONGODB_URI, {
-    bufferCommands: false, // Recommended for serverless
+    // bufferCommands: true, // Default is true, allowing commands to queue until connected
   });
   console.log('Connected to MongoDB Atlas');
   return cachedConnection;
@@ -150,11 +150,24 @@ app.get('/api/invoices', async (req, res) => {
 app.post('/api/invoices', async (req, res) => {
   try {
     const inv = req.body;
-    if (!inv || !inv.id) return res.status(400).json({ error: 'Missing invoice id' });
+    console.log('--- POST /api/invoices ---');
+    console.log('Body ID:', inv ? inv.id : 'N/A');
+    console.log('Filename:', inv ? inv.fileName : 'N/A');
+
+    if (!inv || !inv.id) {
+      console.error('ERROR: Missing invoice id in request body');
+      return res.status(400).json({
+        error: 'Missing invoice id',
+        receivedBodyKeys: inv ? Object.keys(inv) : 'none'
+      });
+    }
 
     // Check if exists
     const existing = await Invoice.findOne({ id: inv.id });
-    if (existing) return res.json({ ok: true });
+    if (existing) {
+      console.log('Invoice already exists:', inv.id);
+      return res.json({ ok: true, exists: true });
+    }
 
     const newInvoice = new Invoice(inv);
     await newInvoice.save();
