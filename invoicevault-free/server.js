@@ -12,6 +12,17 @@ const ADMIN_USER = process.env.ADMIN_USERNAME || 'admin';
 const ADMIN_PASS = process.env.ADMIN_PASSWORD || 'password123';
 const SESSION_SECRET = process.env.SESSION_SECRET || 'invoicevault_secret_88';
 
+// Global error handlers for crash prevention/logging
+process.on('uncaughtException', (err) => {
+  console.error('FATAL: Uncaught Exception:', err);
+  // Optional: keep running or exit gracefully
+  // process.exit(1); 
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('FATAL: Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
 // ── Database Connection ──────────────────────────────────────────────────────
 const MONGODB_URI = process.env.MONGODB_URI;
 
@@ -169,12 +180,22 @@ app.post('/api/invoices', async (req, res) => {
       return res.json({ ok: true, exists: true });
     }
 
-    const newInvoice = new Invoice(inv);
+    const newInvoice = new Invoice({
+      ...inv,
+      clientName: (inv.clientName || '').slice(0, 500), // Safety limit
+      invoiceNumber: (inv.invoiceNumber || '').slice(0, 100)
+    });
+
     await newInvoice.save();
     console.log('Saved to DB:', inv.invoiceNumber, 'for', inv.clientName);
     res.json({ ok: true });
   } catch (e) {
-    console.error('POST /api/invoices error:', e.message);
+    console.error('POST /api/invoices error details:', {
+      message: e.message,
+      code: e.code,
+      name: e.name,
+      stack: e.stack
+    });
     res.status(500).json({ error: e.message, code: e.code, name: e.name });
   }
 });
