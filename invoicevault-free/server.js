@@ -84,6 +84,14 @@ const invoiceSchema = new mongoose.Schema({
 
 const Invoice = mongoose.model('Invoice', invoiceSchema);
 
+// ── Product Price Schema ──────────────────────────────────────────────────────
+const productSchema = new mongoose.Schema({
+  name: { type: String, required: true, unique: true, trim: true },
+  ourPrice: { type: Number, default: 0 },
+  updatedAt: { type: Date, default: Date.now }
+});
+const Product = mongoose.model('Product', productSchema);
+
 // ── Middleware ────────────────────────────────────────────────────────────────
 app.use(express.json({ limit: '10mb' }));
 app.use(cookieParser(SESSION_SECRET));
@@ -223,18 +231,61 @@ app.put('/api/invoices/:id', async (req, res) => {
   }
 });
 
+// ── Products API ─────────────────────────────────────────────────────────────
+app.get('/api/products', async (req, res) => {
+  try {
+    const products = await Product.find().sort({ name: 1 });
+    res.json(products);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.post('/api/products', async (req, res) => {
+  try {
+    const items = Array.isArray(req.body) ? req.body : [req.body];
+    const ops = items.map(item => ({
+      updateOne: {
+        filter: { name: item.name },
+        update: { $set: { ourPrice: item.ourPrice, updatedAt: new Date() } },
+        upsert: true
+      }
+    }));
+    await Product.bulkWrite(ops);
+    const products = await Product.find().sort({ name: 1 });
+    res.json({ ok: true, count: products.length, products });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.delete('/api/products/:name', async (req, res) => {
+  try {
+    await Product.deleteOne({ name: decodeURIComponent(req.params.name) });
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 app.get('/api/export', async (req, res) => {
   try {
     const invoices = await Invoice.find().sort({ uploadedAt: -1 });
+    // Build a product lookup map: name (lowercase) -> ourPrice
+    const productList = await Product.find();
+    const productPriceMap = {};
+    productList.forEach(p => {
+      productPriceMap[p.name.trim().toUpperCase()] = p.ourPrice || 0;
+    });
     const workbook = new ExcelJS.Workbook();
 
     const sheetsMap = {};
     invoices.forEach(inv => {
       const year = inv.year || new Date().getFullYear();
       let sheetName = year.toString();
-      if (year === 2025) {
+      if (year >= 2025) {
         const month = inv.month || 1;
-        sheetName = month <= 6 ? '2025 ( JAN-JUN )' : '2025 ( JUL-DEC )';
+        sheetName = month <= 6 ? `${year} ( JAN-JUN )` : `${year} ( JUL-DEC )`;
       }
       if (!sheetsMap[sheetName]) sheetsMap[sheetName] = [];
       sheetsMap[sheetName].push(inv);
@@ -282,7 +333,11 @@ app.get('/api/export', async (req, res) => {
           const isFirst = idx === 0;
           const qty = item.quantity || 0;
           const unitPrice = item.unitPrice || 0;
-          const ourPrice = item.ourPrice || 0;
+          // Look up ourPrice from Product catalog first, fall back to stored value on item
+          const descKey = (item.description || '').trim().toUpperCase();
+          const ourPrice = productPriceMap[descKey] !== undefined
+            ? productPriceMap[descKey]
+            : (item.ourPrice || 0);
           const amount = +(qty * unitPrice).toFixed(2);
           const profit = +(amount - (qty * ourPrice)).toFixed(2);
           const asisCut = +(profit / 2).toFixed(2);
@@ -300,6 +355,23 @@ app.get('/api/export', async (req, res) => {
           });
           currentRow++;
         });
+
+        // If invoice has no line items, still write a summary row so it appears in the export
+        if (items.length === 0) {
+          const row = sheet.getRow(currentRow);
+          row.values = [
+            sNo, inv.invoiceNumber, dateStr,
+            inv.clientName, '', '', '(no line items)',
+            '', inv.tax || 0, inv.total || 0,
+            inv.total || 0, '', '', ''
+          ];
+          ['I', 'J', 'K'].forEach(col => {
+            const cell = row.getCell(col);
+            if (cell.value !== '') cell.numFmt = '#,##0.00';
+          });
+          currentRow++;
+        }
+
         sNo++;
       });
     }

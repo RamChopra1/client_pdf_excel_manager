@@ -1078,6 +1078,174 @@
     .batch-btn.red:hover {
       color: #f87171;
     }
+
+    /* ── OUR PRICE TAB ── */
+    .price-toolbar {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+
+    .price-search {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 8px 13px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      width: 240px;
+      outline: none;
+      background: var(--card);
+      color: var(--ink);
+      transition: .2s;
+    }
+
+    .price-search:focus {
+      border-color: var(--accent);
+    }
+
+    .price-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .price-table th {
+      background: var(--surface);
+      padding: 10px 14px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      color: var(--muted);
+      text-align: left;
+      border-bottom: 2px solid var(--border);
+    }
+
+    .price-table td {
+      padding: 9px 14px;
+      font-size: 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+
+    .price-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .price-table tr:hover td {
+      background: var(--tag-bg);
+    }
+
+    .price-input {
+      width: 110px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 6px 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      outline: none;
+      background: var(--card);
+      color: var(--ink);
+      transition: .2s;
+    }
+
+    .price-input:focus {
+      border-color: var(--accent);
+    }
+
+    .price-name-input {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 6px 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      outline: none;
+      background: var(--card);
+      color: var(--ink);
+      transition: .2s;
+    }
+
+    .price-name-input:focus {
+      border-color: var(--accent);
+    }
+
+    .btn-save-prices {
+      background: var(--green);
+      color: #fff;
+      border: none;
+      padding: 9px 20px;
+      border-radius: var(--radius-sm);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: .2s;
+    }
+
+    .btn-save-prices:hover {
+      opacity: .88;
+    }
+
+    .btn-add-product {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 9px 18px;
+      border-radius: var(--radius-sm);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: .2s;
+    }
+
+    .btn-add-product:hover {
+      background: var(--accent2);
+    }
+
+    .btn-autofill {
+      background: var(--surface);
+      color: var(--ink);
+      border: 1px solid var(--border);
+      padding: 9px 18px;
+      border-radius: var(--radius-sm);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: .2s;
+    }
+
+    .btn-autofill:hover {
+      background: var(--border);
+    }
+
+    .price-summary-bar {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px 18px;
+      margin-bottom: 16px;
+      font-size: 13px;
+      color: var(--muted);
+      display: flex;
+      gap: 24px;
+      align-items: center;
+    }
+
+    .price-summary-bar strong {
+      color: var(--ink);
+    }
   </style>
 </head>
 
@@ -1101,6 +1269,8 @@
     </div>
     <div class="nav-tab" onclick="switchTab('monthly')">📅 Monthly</div>
     <div class="nav-tab" onclick="switchTab('clients')">👥 Clients</div>
+    <div class="nav-tab" onclick="switchTab('prices')">💰 Our Price <span class="tab-count" id="priceCount">0</span>
+    </div>
   </div>
 
   <main>
@@ -1306,6 +1476,25 @@
       <div id="clientsContent"></div>
     </div>
 
+    <!-- ═══ OUR PRICE ═══ -->
+    <div class="tab-pane" id="tab-prices">
+      <div class="price-summary-bar" id="priceSummaryBar">
+        <span>💡 Set your cost prices here. The <strong>Excel export</strong> and <strong>Profit metrics</strong> update
+          automatically.</span>
+      </div>
+      <div class="price-toolbar">
+        <input class="price-search" id="priceSearch" placeholder="🔍 Filter products..." oninput="renderPriceTable()">
+        <button class="btn-autofill" onclick="autoFillFromInvoices()"
+          title="Populate product list from invoice line items">✨ Auto-fill from Invoices</button>
+        <button class="btn-add-product" onclick="addNewProductRow()">＋ Add Product</button>
+        <button class="btn-save-prices" onclick="saveAllPrices()">💾 Save All Prices</button>
+        <span style="margin-left:auto;font-size:13px;color:var(--muted)" id="priceSaveStatus"></span>
+      </div>
+      <div class="table-wrap">
+        <div id="priceTableBody"></div>
+      </div>
+    </div>
+
   </main>
 
   <!-- ═══ DETAIL / EDIT MODAL ═══ -->
@@ -1382,6 +1571,8 @@
     //  STATE & HELPERS
     // ══════════════════════════════════════════════════════
     let invoices = [];
+    let productMap = {}; // { 'PRODUCT NAME UPPERCASE': price }
+    let productRows = []; // Live editable rows for Our Price tab
     const RATES = { CAD: 1, USD: 1.38, EUR: 1.48, GBP: 1.76 }; // Approx rates for normalization
     const normalize = (s) => (s || '').replace(/[\u2013\u2014\u2212]/g, '-').trim();
 
@@ -1403,14 +1594,24 @@
 
     async function loadData() {
       try {
-        const r = await fetch('/api/invoices');
-        const data = await r.json();
+        const [invRes, prodRes] = await Promise.all([
+          fetch('/api/invoices'),
+          fetch('/api/products')
+        ]);
+        const data = await invRes.json();
         if (Array.isArray(data)) {
           invoices = data;
         } else {
           console.error('Unexpected data from server:', data);
           invoices = [];
           if (data && data.error) showToast('Server Error: ' + data.error, 'err');
+        }
+        const prodData = await prodRes.json();
+        if (Array.isArray(prodData)) {
+          productRows = prodData.map(p => ({ name: p.name, ourPrice: p.ourPrice || 0 }));
+          productMap = {};
+          productRows.forEach(p => { productMap[p.name.toUpperCase()] = p.ourPrice; });
+          document.getElementById('priceCount').textContent = productRows.length;
         }
       } catch (err) {
         console.error('Load error:', err);
@@ -1426,11 +1627,13 @@
       document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
       document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
       document.getElementById('tab-' + name).classList.add('active');
-      const tabs = ['dashboard', 'upload', 'invoices', 'monthly', 'clients'];
-      document.querySelectorAll('.nav-tab')[tabs.indexOf(name)].classList.add('active');
+      const tabs = ['dashboard', 'upload', 'invoices', 'monthly', 'clients', 'prices'];
+      const idx = tabs.indexOf(name);
+      if (idx >= 0) document.querySelectorAll('.nav-tab')[idx].classList.add('active');
       if (name === 'invoices') renderInvTable();
       if (name === 'monthly') renderMonthly();
       if (name === 'clients') renderClients();
+      if (name === 'prices') renderPriceTable();
     }
 
     // ══════════════════════════════════════════════════════
@@ -1912,7 +2115,7 @@
       const avg = n ? total / n : 0;
       const clients = new Set(invoices.map(i => i.clientName).filter(Boolean)).size;
 
-      // Profit calculation
+      // Profit calculation — uses global productMap (Our Price catalog), falls back to per-item ourPrice
       let totalProfit = 0;
       let profitEligibleTotal = 0;
       invoices.forEach(inv => {
@@ -1920,7 +2123,10 @@
         (inv.lineItems || []).forEach(item => {
           const qty = item.quantity || 0;
           const price = item.unitPrice || 0;
-          const cost = item.ourPrice || 0;
+          const descKey = (item.description || '').trim().toUpperCase();
+          const cost = productMap[descKey] !== undefined
+            ? productMap[descKey]
+            : (item.ourPrice || 0);
           if (cost > 0) {
             invProfit += (qty * price) - (qty * cost);
           }
@@ -2004,13 +2210,16 @@
       const ctxCat = document.getElementById('catDistChart');
       if (!ctxCat) return;
       if (catDistChart) catDistChart.destroy();
+      const catKeys = Object.keys(catData);
+      const catColors = catKeys.map((_, i) => `hsl(${Math.round(i * 360 / catKeys.length)}, 65%, 52%)`);
+
       catDistChart = new Chart(ctxCat.getContext('2d'), {
         type: 'doughnut',
         data: {
-          labels: Object.keys(catData),
+          labels: catKeys,
           datasets: [{
             data: Object.values(catData),
-            backgroundColor: ['#2563eb', '#059669', '#d97706', '#7c3aed', '#dc2626', '#64748b']
+            backgroundColor: catColors
           }]
         },
         options: {
@@ -2396,6 +2605,131 @@
     function showToast(msg, type = 'ok') {
       const t = document.getElementById('toast'); t.textContent = msg; t.className = `toast ${type} show`;
       setTimeout(() => t.classList.remove('show'), 3200);
+    }
+
+    // ══════════════════════════════════════════════════════
+    //  OUR PRICE MANAGEMENT
+    // ══════════════════════════════════════════════════════
+
+    function renderPriceTable() {
+      const search = (document.getElementById('priceSearch').value || '').toLowerCase();
+      const body = document.getElementById('priceTableBody');
+      const filtered = productRows.filter(p => p.name.toLowerCase().includes(search));
+
+      if (!filtered.length) {
+        body.innerHTML = `<div class="empty"><div class="empty-icon">💰</div><div class="empty-title">No products yet</div><div class="empty-sub">${productRows.length ? 'No matches for your search.' : 'Click "✨ Auto-fill from Invoices" to populate from your invoice history, or "＋ Add Product" to add manually.'}</div></div>`;
+        return;
+      }
+
+      body.innerHTML = `<table class="price-table">
+        <thead><tr>
+          <th style="width:50px">#</th>
+          <th>Product Name</th>
+          <th style="width:160px">Our Cost Price ($)</th>
+          <th style="width:80px"></th>
+        </tr></thead>
+        <tbody>
+          ${filtered.map((p, idx) => `<tr data-name="${encodeURIComponent(p.name)}">
+            <td style="color:var(--muted);font-size:12px">${idx + 1}</td>
+            <td><input class="price-name-input" data-rowname="${encodeURIComponent(p.name)}" value="${p.name}" onchange="updateProductName(this, '${encodeURIComponent(p.name)}')"></td>
+            <td><input class="price-input" type="number" step="0.01" min="0" data-name="${encodeURIComponent(p.name)}" value="${p.ourPrice}" placeholder="0.00" oninput="updateProductPrice(this, '${encodeURIComponent(p.name)}')"></td>
+            <td><button class="icon-btn del" onclick="deleteProductRow('${encodeURIComponent(p.name)}')" title="Remove">🗑</button></td>
+          </tr>`).join('')}
+        </tbody>
+      </table>`;
+    }
+
+    function updateProductPrice(input, encodedName) {
+      const name = decodeURIComponent(encodedName);
+      const row = productRows.find(p => p.name === name);
+      if (row) row.ourPrice = parseFloat(input.value) || 0;
+    }
+
+    function updateProductName(input, encodedOldName) {
+      const oldName = decodeURIComponent(encodedOldName);
+      const row = productRows.find(p => p.name === oldName);
+      if (row) row.name = input.value.trim();
+    }
+
+    async function deleteProductRow(encodedName) {
+      const name = decodeURIComponent(encodedName);
+      try {
+        await fetch('/api/products/' + encodeURIComponent(name), { method: 'DELETE' });
+      } catch (e) {
+        showToast('Could not delete from server: ' + e.message, 'err');
+      }
+      productRows = productRows.filter(p => p.name !== name);
+      delete productMap[name.toUpperCase()];
+      document.getElementById('priceCount').textContent = productRows.length;
+      renderPriceTable();
+      showToast(`Removed "${name}"`, 'ok');
+    }
+
+    function addNewProductRow() {
+      productRows.unshift({ name: 'NEW PRODUCT', ourPrice: 0 });
+      document.getElementById('priceCount').textContent = productRows.length;
+      document.getElementById('priceSearch').value = '';
+      renderPriceTable();
+      // Focus the first name input
+      setTimeout(() => {
+        const inp = document.querySelector('.price-name-input');
+        if (inp) { inp.focus(); inp.select(); }
+      }, 50);
+    }
+
+    function autoFillFromInvoices() {
+      if (!invoices.length) {
+        showToast('No invoices loaded yet — upload some first!', 'err');
+        return;
+      }
+      const existingNames = new Set(productRows.map(p => p.name.toUpperCase()));
+      let added = 0;
+      invoices.forEach(inv => {
+        (inv.lineItems || []).forEach(item => {
+          const name = (item.description || '').trim();
+          if (!name || name.length < 2) return;
+          if (!existingNames.has(name.toUpperCase())) {
+            productRows.push({ name, ourPrice: 0 });
+            existingNames.add(name.toUpperCase());
+            added++;
+          }
+        });
+      });
+      // Sort alphabetically
+      productRows.sort((a, b) => a.name.localeCompare(b.name));
+      document.getElementById('priceCount').textContent = productRows.length;
+      renderPriceTable();
+      showToast(added > 0 ? `Added ${added} product(s) from invoices!` : 'All products already in the list.', 'ok');
+    }
+
+    async function saveAllPrices() {
+      const statusEl = document.getElementById('priceSaveStatus');
+      statusEl.textContent = '⏳ Saving...';
+      try {
+        const payload = productRows
+          .filter(p => p.name && p.name.trim())
+          .map(p => ({ name: p.name.trim(), ourPrice: parseFloat(p.ourPrice) || 0 }));
+
+        const res = await fetch('/api/products', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!res.ok || !data.ok) throw new Error(data.error || 'Save failed');
+
+        // Update productMap for live dashboard calc
+        productMap = {};
+        productRows.forEach(p => { productMap[p.name.toUpperCase()] = p.ourPrice; });
+        document.getElementById('priceCount').textContent = productRows.length;
+        statusEl.textContent = `✅ Saved ${data.count} products`;
+        setTimeout(() => { statusEl.textContent = ''; }, 3000);
+        showToast('Prices saved successfully!', 'ok');
+        refresh(); // Recalculate dashboard profit metrics
+      } catch (e) {
+        statusEl.textContent = '❌ Error saving';
+        showToast('Error: ' + e.message, 'err');
+      }
     }
 
     loadData();
