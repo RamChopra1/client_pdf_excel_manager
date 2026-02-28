@@ -1693,12 +1693,28 @@
     //  SERVER SYNC
     // ══════════════════════════════════════════════════════
     async function saveToServer(inv) {
-      const r = await fetch('/api/invoices', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(inv) });
+      if (!inv.id) {
+        console.warn('Invoice missing ID, generating one now');
+        inv.id = 'inv_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+      }
+      console.log('--- Sending to Server ---');
+      console.log('ID:', inv.id);
+      console.log('File:', inv.fileName);
+
+      const r = await fetch('/api/invoices', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(inv)
+      });
+
       if (!r.ok) {
         let msg = 'Failed to save to server';
         try {
           const data = await r.json();
-          if (data.error) msg = `Server Error: ${data.error}`;
+          if (data.error) {
+            msg = `Server Error: ${data.error}`;
+            console.error('Server error details:', data);
+          }
         } catch (e) { }
         throw new Error(msg);
       }
