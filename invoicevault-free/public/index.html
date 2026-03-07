@@ -1246,6 +1246,303 @@
     .price-summary-bar strong {
       color: var(--ink);
     }
+
+    /* ── INVOICE MAKER ── */
+    .inv-maker-wrap {
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      padding: 24px;
+      max-width: 780px;
+      margin: 0 auto;
+      font-family: Arial, sans-serif;
+      color: #000;
+    }
+
+    [data-theme="dark"] .inv-maker-wrap {
+      background: #fff;
+      color: #000;
+    }
+
+    .inv-maker-toolbar {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .inv-maker-toolbar .save-btn {
+      padding: 10px 22px;
+      font-size: 14px;
+    }
+
+    .inv-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 6px;
+    }
+
+    .inv-logo-block {
+      flex: 1;
+    }
+
+    .inv-logo-name {
+      font-size: 28px;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      line-height: 1;
+    }
+
+    .inv-logo-name span.gb {
+      color: #1a6aba;
+    }
+
+    .inv-logo-name span.ws {
+      color: #1a6aba;
+      font-weight: 400;
+      font-size: 20px;
+    }
+
+    .inv-logo-tag {
+      font-size: 9px;
+      color: #555;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 2px;
+      background: #ddeeff;
+      display: inline-block;
+      padding: 1px 6px;
+      border-radius: 2px;
+    }
+
+    .inv-addr {
+      font-size: 11px;
+      color: #333;
+      margin-top: 8px;
+      line-height: 1.6;
+    }
+
+    .inv-title-block {
+      text-align: right;
+    }
+
+    .inv-title-block h2 {
+      font-size: 26px;
+      font-weight: 700;
+      font-style: italic;
+      color: #000;
+      margin: 0 0 8px;
+    }
+
+    .inv-meta-grid {
+      display: grid;
+      grid-template-columns: auto auto;
+      gap: 2px 10px;
+      font-size: 11px;
+      text-align: left;
+    }
+
+    .inv-meta-grid label {
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .inv-etransfer {
+      text-align: center;
+      font-size: 11px;
+      color: #555;
+      border-top: 1px solid #ccc;
+      border-bottom: 1px solid #ccc;
+      padding: 3px 0;
+      margin: 8px 0;
+    }
+
+    .inv-cheque {
+      text-align: center;
+      font-size: 12px;
+      color: #c00;
+      font-weight: 700;
+      text-decoration: underline;
+      margin-bottom: 10px;
+    }
+
+    .inv-billto {
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .inv-billto-input {
+      width: 100%;
+      border: 1px solid #aaa;
+      border-radius: 3px;
+      padding: 5px 8px;
+      font-size: 13px;
+      font-family: Arial, sans-serif;
+      color: #000;
+      background: #fffde7;
+      margin-bottom: 12px;
+    }
+
+    .inv-input {
+      border: 1px solid #aaa;
+      border-radius: 3px;
+      padding: 3px 6px;
+      font-size: 11px;
+      font-family: Arial, sans-serif;
+      color: #000;
+      background: #fffde7;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .inv-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+
+    .inv-table th {
+      background: #000;
+      color: #fff;
+      padding: 6px 8px;
+      text-align: center;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .3px;
+      border: 1px solid #000;
+      text-transform: uppercase;
+    }
+
+    .inv-table td {
+      border: 1px solid #999;
+      padding: 5px 7px;
+      vertical-align: middle;
+      background: #fff;
+      color: #000;
+    }
+
+    .inv-table td.center {
+      text-align: center;
+    }
+
+    .inv-table td.right {
+      text-align: right;
+    }
+
+    .inv-totals-row {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 4px;
+    }
+
+    .inv-paid-block {
+      font-size: 12px;
+      flex: 1;
+    }
+
+    .inv-totals-table {
+      width: 260px;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    .inv-totals-table td {
+      border: 1px solid #999;
+      padding: 4px 8px;
+      background: #fff;
+      color: #000;
+    }
+
+    .inv-totals-table td.lbl {
+      font-weight: 700;
+      text-align: right;
+      width: 120px;
+      background: #f5f5f5;
+    }
+
+    .inv-totals-table td.total-row {
+      font-weight: 900;
+      background: #f5f5f5;
+    }
+
+    .inv-thankyou {
+      text-align: center;
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: 1px;
+      border-top: 3px solid #000;
+      margin-top: 16px;
+      padding-top: 8px;
+    }
+
+    .inv-del-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      color: #c00;
+      padding: 0 4px;
+    }
+
+    .inv-add-row-btn {
+      background: #f0f0f0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      padding: 5px 14px;
+      font-size: 12px;
+      cursor: pointer;
+      margin-bottom: 10px;
+    }
+
+    .inv-add-row-btn:hover {
+      background: #e0e0e0;
+    }
+
+    @media print {
+      body>*:not(#invoice-print-root) {
+        display: none !important;
+      }
+
+      #invoice-print-root {
+        display: block !important;
+      }
+
+      .inv-del-btn,
+      .inv-add-row-btn,
+      .inv-maker-toolbar {
+        display: none !important;
+      }
+
+      .inv-input,
+      .inv-billto-input {
+        border: none !important;
+        background: transparent !important;
+      }
+
+      header,
+      .nav-tabs,
+      .batch-bar,
+      .search-overlay,
+      .mo,
+      .toast {
+        display: none !important;
+      }
+
+      main {
+        display: none !important;
+      }
+
+      #invoice-print-root {
+        position: fixed;
+        inset: 0;
+        background: #fff;
+        padding: 20px;
+        z-index: 99999;
+      }
+    }
   </style>
 </head>
 
@@ -1271,6 +1568,7 @@
     <div class="nav-tab" onclick="switchTab('clients')">👥 Clients</div>
     <div class="nav-tab" onclick="switchTab('prices')">💰 Our Price <span class="tab-count" id="priceCount">0</span>
     </div>
+    <div class="nav-tab" onclick="switchTab('invoice-maker')">🧾 Invoice Maker</div>
   </div>
 
   <main>
@@ -1495,6 +1793,141 @@
       </div>
     </div>
 
+    <!-- ═══ INVOICE MAKER ═══ -->
+    <div class="tab-pane" id="tab-invoice-maker">
+      <!-- Action toolbar (hidden on print) -->
+      <div class="inv-maker-toolbar">
+        <button class="save-btn" onclick="downloadInvoicePDF()" style="background:#1a6aba">📄 Download PDF</button>
+        <button class="save-btn" onclick="saveInvoiceMaker()">💾 Save Invoice</button>
+        <button class="save-btn" onclick="resetInvoiceMaker()" style="background:#64748b">🔄 New Invoice</button>
+      </div>
+
+      <!-- Printable invoice area -->
+      <div id="invoice-print-root">
+        <div class="inv-maker-wrap" id="invMakerForm">
+
+          <!-- Header row 1: Logo | Invoice -->
+          <div class="inv-header-row">
+            <div class="inv-logo-block">
+              <div style="display:inline-block;border:2px solid #1a6aba;padding:6px 10px 4px 10px;">
+                <div style="display:flex;align-items:center;gap:0;line-height:1">
+                  <span style="font-size:42px;font-weight:900;color:#4a8a3a;font-family:Arial,sans-serif">G</span>
+                  <span style="font-size:42px;font-weight:900;color:#e87722;font-family:Arial,sans-serif">B</span>
+                  <span
+                    style="font-size:22px;font-weight:700;color:#1a6aba;font-family:Arial,sans-serif;padding-left:5px">Wholesale</span>
+                </div>
+                <div
+                  style="font-size:8px;color:#1a6aba;letter-spacing:1.2px;text-align:center;border-top:1px solid #1a6aba;margin-top:3px;padding-top:2px;font-family:Arial,sans-serif">
+                  WE DELIVER AT YOUR DOORSTEP</div>
+              </div>
+            </div>
+            <div class="inv-title-block">
+              <h2 style="font-size:28px;font-weight:900;font-style:italic;margin-bottom:10px">Invoice</h2>
+              <div style="font-size:11px;display:grid;grid-template-columns:auto auto;gap:3px 10px;text-align:left">
+                <span style="font-weight:700">DATE:</span>
+                <input class="inv-input" id="im_date" type="date" style="width:130px">
+              </div>
+            </div>
+          </div>
+
+          <!-- Header row 2: Address | HST NO. | INVOICE# -->
+          <div
+            style="display:flex;justify-content:space-between;align-items:flex-start;margin:4px 0 5px;font-size:11px">
+            <div class="inv-addr" style="color:#1a3a6b;font-size:10.5px;line-height:1.72;font-weight:500">
+              19100 HWY 12<br>
+              GREENBANK, ON, L0C 1B0<br>
+              647-861-4686 (Asis)<br>
+              www.gbwholesale.ca
+            </div>
+            <div style="text-align:center;font-size:11px">
+              <span style="font-weight:700">HST NO. -</span>&nbsp;&nbsp;764238879 RT0001
+            </div>
+            <div style="text-align:right;font-size:11px">
+              <div><span style="font-weight:700">INVOICE #</span>&nbsp;&nbsp;<input class="inv-input" id="im_invnum"
+                  style="width:100px" placeholder="e.g. 18000"></div>
+            </div>
+          </div>
+
+          <div class="inv-etransfer"
+            style="font-weight:700;color:#1a3a6b;text-align:center;border-top:1px solid #bbb;border-bottom:1px solid #bbb;padding:4px 0;margin-bottom:5px">
+            E-Transfers made payable to : SHELLGREENBANK@GMAIL.COM
+          </div>
+          <div class="inv-cheque">Cheques made payable to: 2724142 Ontario Inc.</div>
+
+          <!-- Bill To -->
+          <div class="inv-billto">Bill To :</div>
+          <textarea class="inv-billto-input" id="im_billto" rows="2" placeholder="Customer name / address"></textarea>
+
+          <!-- Line Items -->
+          <table class="inv-table" id="im_itemTable">
+            <thead>
+              <tr>
+                <th style="width:70px">QUANTITY</th>
+                <th>DESCRIPTION</th>
+                <th style="width:95px">UNIT PRICE</th>
+                <th style="width:95px">AMOUNT</th>
+                <th style="width:30px" class="no-print"></th>
+              </tr>
+            </thead>
+            <tbody id="im_itemBody">
+              <!-- rows inserted by JS -->
+            </tbody>
+          </table>
+          <button class="inv-add-row-btn no-print" onclick="addInvoiceMakerRow()">＋ Add Line Item</button>
+
+          <!-- Paid By + Totals row -->
+          <div class="inv-totals-row">
+            <div class="inv-paid-block">
+              <table class="inv-table" style="width:auto;margin-top:4px">
+                <tr>
+                  <td style="font-weight:700;padding:6px 10px">Paid By -</td>
+                  <td>
+                    <select class="inv-input" id="im_paidby" style="width:100px">
+                      <option value="Cheque">Cheque</option>
+                      <option value="Cash">Cash</option>
+                      <option value="E-Transfer">E-Transfer</option>
+                      <option value="">—</option>
+                    </select>
+                  </td>
+                </tr>
+              </table>
+            </div>
+
+            <table class="inv-totals-table">
+              <tr>
+                <td class="lbl">SUBTOTAL</td>
+                <td class="right" id="im_subtotal">$ 0.00</td>
+              </tr>
+              <tr>
+                <td class="lbl">TAX RATE</td>
+                <td>
+                  <input class="inv-input" id="im_taxrate" type="number" value="13" min="0" max="100" step="0.01"
+                    oninput="calcInvoiceTotals()" style="width:60px"> %
+                </td>
+              </tr>
+              <tr>
+                <td class="lbl">SALES TAX</td>
+                <td class="right" id="im_salestax">$ 0.00</td>
+              </tr>
+              <tr>
+                <td class="lbl">DELIVERY FEE</td>
+                <td>
+                  <input class="inv-input" id="im_delivery" type="number" value="0" min="0" step="0.01"
+                    oninput="calcInvoiceTotals()" style="width:80px">
+                </td>
+              </tr>
+              <tr>
+                <td class="lbl total-row">TOTAL</td>
+                <td class="right total-row" id="im_total" style="font-weight:900">$ 0.00</td>
+              </tr>
+            </table>
+          </div>
+
+          <div class="inv-thankyou">THANK YOU FOR YOUR BUSINESS!</div>
+        </div>
+      </div>
+    </div>
+
   </main>
 
   <!-- ═══ DETAIL / EDIT MODAL ═══ -->
@@ -1627,13 +2060,14 @@
       document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
       document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
       document.getElementById('tab-' + name).classList.add('active');
-      const tabs = ['dashboard', 'upload', 'invoices', 'monthly', 'clients', 'prices'];
+      const tabs = ['dashboard', 'upload', 'invoices', 'monthly', 'clients', 'prices', 'invoice-maker'];
       const idx = tabs.indexOf(name);
       if (idx >= 0) document.querySelectorAll('.nav-tab')[idx].classList.add('active');
       if (name === 'invoices') renderInvTable();
       if (name === 'monthly') renderMonthly();
       if (name === 'clients') renderClients();
       if (name === 'prices') renderPriceTable();
+      if (name === 'invoice-maker') initInvoiceMaker();
     }
 
     // ══════════════════════════════════════════════════════
@@ -2730,6 +3164,385 @@
         statusEl.textContent = '❌ Error saving';
         showToast('Error: ' + e.message, 'err');
       }
+    }
+
+    // ══════════════════════════════════════════════════════
+    //  INVOICE MAKER
+    // ══════════════════════════════════════════════════════
+    let imInitialized = false;
+
+    function initInvoiceMaker() {
+      // Only seed defaults on first open; preserve re-visits
+      if (imInitialized) return;
+      imInitialized = true;
+      // Set today's date
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('im_date').value = today;
+      // Generate a suggested invoice number (auto-increment from max existing)
+      const maxNum = invoices.reduce((mx, inv) => {
+        const n = parseInt((inv.invoiceNumber || '').replace(/\D/g, ''), 10);
+        return isNaN(n) ? mx : Math.max(mx, n);
+      }, 17825);
+      document.getElementById('im_invnum').value = String(maxNum + 1);
+      // Add 3 blank rows
+      addInvoiceMakerRow();
+      addInvoiceMakerRow();
+      addInvoiceMakerRow();
+    }
+
+    function addInvoiceMakerRow() {
+      const tbody = document.getElementById('im_itemBody');
+      const tr = document.createElement('tr');
+      tr.innerHTML =
+        `<td class="center"><input class="inv-input" type="number" min="0" step="1" value="" oninput="calcInvoiceTotals()" style="width:55px;text-align:center"></td>` +
+        `<td><input class="inv-input" type="text" value="" placeholder="Product description" style="min-width:180px"></td>` +
+        `<td class="right"><input class="inv-input" type="number" min="0" step="0.01" value="" oninput="calcInvoiceTotals()" style="width:80px;text-align:right"></td>` +
+        `<td class="right amt-cell" style="min-width:80px">$ 0.00</td>` +
+        `<td class="no-print" style="text-align:center"><button class="inv-del-btn" onclick="removeInvoiceMakerRow(this)" title="Remove row">✕</button></td>`;
+      tbody.appendChild(tr);
+    }
+
+    function removeInvoiceMakerRow(btn) {
+      const tr = btn.closest('tr');
+      if (document.querySelectorAll('#im_itemBody tr').length <= 1) return; // keep at least 1
+      tr.remove();
+      calcInvoiceTotals();
+    }
+
+    function calcInvoiceTotals() {
+      let subtotal = 0;
+      document.querySelectorAll('#im_itemBody tr').forEach(tr => {
+        const inputs = tr.querySelectorAll('input');
+        const qty = parseFloat(inputs[0].value) || 0;
+        const price = parseFloat(inputs[2].value) || 0;
+        const amt = qty * price;
+        tr.querySelector('.amt-cell').textContent = '$ ' + amt.toFixed(2);
+        subtotal += amt;
+      });
+      const taxRate = parseFloat(document.getElementById('im_taxrate').value) || 0;
+      const delivery = parseFloat(document.getElementById('im_delivery').value) || 0;
+      const salesTax = subtotal * taxRate / 100;
+      const total = subtotal + salesTax + delivery;
+      document.getElementById('im_subtotal').textContent = '$ ' + subtotal.toFixed(2);
+      document.getElementById('im_salestax').textContent = '$ ' + salesTax.toFixed(2);
+      document.getElementById('im_total').textContent = '$ ' + total.toFixed(2);
+    }
+
+    function downloadInvoicePDF() {
+      // Collect current values from the form
+      const date = document.getElementById('im_date').value || '';
+      const invNum = document.getElementById('im_invnum').value || '';
+      const billTo = document.getElementById('im_billto').value || '';
+      const paidBy = document.getElementById('im_paidby').value || '';
+      const taxRate = parseFloat(document.getElementById('im_taxrate').value) || 0;
+      const delivery = parseFloat(document.getElementById('im_delivery').value) || 0;
+
+      // Build line items HTML
+      let subtotal = 0;
+      let rowsHTML = '';
+      document.querySelectorAll('#im_itemBody tr').forEach(tr => {
+        const inputs = tr.querySelectorAll('input');
+        const qty = parseFloat(inputs[0].value) || 0;
+        const desc = (inputs[1].value || '').trim();
+        const price = parseFloat(inputs[2].value) || 0;
+        const amt = qty * price;
+        subtotal += amt;
+        rowsHTML += `<tr>
+          <td class="qty">${qty || ''}</td>
+          <td class="desc">${desc}</td>
+          <td class="price-sym">${price ? '$' : ''}</td>
+          <td class="price-val">${price ? price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : ''}</td>
+          <td class="price-sym">${amt ? '$' : ''}</td>
+          <td class="price-val">${amt ? amt.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : ''}</td>
+        </tr>`;
+      });
+      // Pad with empty rows (at least 8 total)
+      const filledRows = document.querySelectorAll('#im_itemBody tr').length;
+      for (let i = filledRows; i < 8; i++) {
+        rowsHTML += `<tr>
+          <td class="empty">&nbsp;</td>
+          <td class="empty">&nbsp;</td>
+          <td class="empty">&nbsp;</td>
+          <td class="empty">&nbsp;</td>
+          <td class="empty">&nbsp;</td>
+          <td class="empty">&nbsp;</td>
+        </tr>`;
+      }
+
+      const salesTax = subtotal * taxRate / 100;
+      const total = subtotal + salesTax + delivery;
+
+      const fmtDate = (() => { if (!date) return ''; const p = date.split('-'); return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : date; })();
+
+      const printHTML = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Invoice ${invNum}</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; color: #000; background: #fff; padding: 22px 26px; font-size: 12px; }
+
+    /* ── Header ── */
+    .hdr { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2px; }
+    .logo-box { display: inline-block; border: 2px solid #1a6aba; padding: 5px 10px 4px 10px; }
+    .logo-letters { display: flex; align-items: center; gap: 0; line-height: 1; }
+    .logo-g { font-size: 42px; font-weight: 900; color: #4a8a3a; }
+    .logo-b { font-size: 42px; font-weight: 900; color: #e87722; }
+    .logo-ws { font-size: 22px; font-weight: 700; color: #1a6aba; padding-left: 5px; }
+    .logo-tag { font-size: 7.5px; color: #1a6aba; letter-spacing: 1.3px; text-align: center; border-top: 1px solid #1a6aba; margin-top: 3px; padding-top: 2px; text-transform: uppercase; }
+    .addr { font-size: 10.5px; color: #1a3a6b; margin-top: 6px; line-height: 1.72; font-weight: 500; }
+    .inv-title-block { text-align: right; }
+    .inv-title { font-size: 28px; font-weight: 900; font-style: italic; margin-bottom: 10px; }
+    .meta-right { font-size: 11px; display: grid; grid-template-columns: auto auto; gap: 3px 14px; text-align: left; }
+    .meta-right .lbl { font-weight: 700; }
+
+    /* ── HST + address row ── */
+    .addr-hst-row { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2px; }
+    .hst-block { font-size: 11px; display: grid; grid-template-columns: auto auto; gap: 3px 10px; }
+    .hst-block .lbl { font-weight: 700; }
+
+    /* ── E-Transfer / Cheque lines ── */
+    .etransfer { font-size: 11.5px; font-weight: 700; color: #1a3a6b; text-align: center; border-top: 1px solid #ccc; border-bottom: 1px solid #ccc; padding: 4px 0; margin: 5px 0 4px; }
+    .cheque-line { text-align: center; font-size: 12px; color: #c00; font-weight: 700; text-decoration: underline; margin-bottom: 10px; }
+
+    /* ── Bill To ── */
+    .billto-row { display: flex; align-items: flex-start; gap: 16px; font-size: 12px; margin-bottom: 10px; }
+    .billto-lbl { font-weight: 700; white-space: nowrap; min-width: 55px; }
+    .billto-val { font-weight: 700; }
+
+    /* ── Items table ── */
+    .items-table { width: 100%; border-collapse: collapse; margin-bottom: 0; }
+    .items-table th { background: #000; color: #fff; padding: 7px 8px; text-align: center; font-size: 11px; font-weight: 700; text-transform: uppercase; border: 1px solid #000; letter-spacing: .4px; }
+    .items-table td { border: 1px solid #999; padding: 6px 8px; vertical-align: middle; }
+    .items-table td.qty { text-align: center; }
+    .items-table td.desc { color: #1a6aba; font-weight: 500; }
+    .items-table td.price-sym { width: 14px; text-align: right; border-right: none; padding-right: 2px; }
+    .items-table td.price-val { text-align: right; border-left: none; padding-left: 2px; }
+    .items-table td.empty { height: 32px; }
+
+    /* ── Bottom row ── */
+    .bottom-row { display: flex; justify-content: space-between; align-items: flex-start; border-top: none; }
+    .paid-table { border-collapse: collapse; border: 1px solid #999; }
+    .paid-table td { border-bottom: 1px solid #999; padding: 8px 14px; font-size: 11.5px; }
+    .paid-table td.paid-lbl { font-weight: 700; border-right: 1px solid #999; }
+    .paid-table td.paid-val { min-width: 80px; }
+
+    /* ── Totals table ── */
+    .totals-table { border-collapse: collapse; min-width: 260px; }
+    .totals-table td { border: 1px solid #999; padding: 4px 8px; font-size: 11.5px; }
+    .totals-table .t-lbl { font-weight: 700; text-align: right; min-width: 110px; background: #f5f5f5; }
+    .totals-table .t-sym { text-align: left; width: 14px; padding-right: 2px; }
+    .totals-table .t-val { text-align: right; min-width: 80px; }
+    .totals-table .t-total .t-lbl { font-weight: 900; background: #e8e8e8; }
+    .totals-table .t-total .t-sym { background: #e8e8e8; font-weight: 900; }
+    .totals-table .t-total .t-val { font-weight: 900; background: #e8e8e8; }
+
+    /* ── Thank You ── */
+    .thankyou { text-align: center; font-size: 13px; font-weight: 900; letter-spacing: 1.5px; border-top: 3px solid #000; margin-top: 14px; padding-top: 8px; }
+
+    @page { size: A4 portrait; margin: 10mm; }
+  </style>
+</head>
+<body>
+
+  <!-- ── HEADER ── -->
+  <div class="hdr">
+    <div>
+      <div class="logo-box">
+        <div class="logo-letters">
+          <span class="logo-g">G</span><span class="logo-b">B</span>
+          <span class="logo-ws">Wholesale</span>
+        </div>
+        <div class="logo-tag">WE DELIVER AT YOUR DOORSTEP</div>
+      </div>
+    </div>
+    <div class="inv-title-block">
+      <div class="inv-title">Invoice</div>
+      <div class="meta-right">
+        <span class="lbl">DATE:</span><span>${fmtDate}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── ADDRESS | HST NO. | INVOICE# row ── -->
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin:4px 0 3px;">
+    <div class="addr">19100 HWY 12<br>GREENBANK, ON, L0C 1B0<br>647-861-4686 (Asis)<br>www.gbwholesale.ca</div>
+    <div style="text-align:center;font-size:11px;padding-top:4px">
+      <span style="font-weight:700">HST NO. -</span>&nbsp;&nbsp;764238879 RT0001
+    </div>
+    <div style="text-align:right;font-size:11px;padding-top:4px">
+      <span style="font-weight:700">INVOICE #</span>&nbsp;${invNum}
+    </div>
+  </div>
+
+  <!-- ── E-TRANSFER / CHEQUE ── -->
+  <div class="etransfer">E-Transfers made payable to : SHELLGREENBANK@GMAIL.COM</div>
+  <div class="cheque-line">Cheques made payable to: 2724142 Ontario Inc.</div>
+
+  <!-- ── BILL TO ── -->
+  <div class="billto-row">
+    <span class="billto-lbl">Bill To :</span>
+    <span class="billto-val">${billTo.replace(/\n/g, '<br>')}</span>
+  </div>
+
+  <!-- ── LINE ITEMS ── -->
+  <table class="items-table">
+    <thead>
+      <tr>
+        <th style="width:75px">QUANTITY</th>
+        <th>DESCRIPTION</th>
+        <th style="width:14px;padding:7px 2px"></th>
+        <th style="width:75px">UNIT PRICE</th>
+        <th style="width:14px;padding:7px 2px"></th>
+        <th style="width:85px">AMOUNT</th>
+      </tr>
+    </thead>
+    <tbody>${rowsHTML}</tbody>
+  </table>
+
+  <!-- ── BOTTOM: PAID BY + TOTALS ── -->
+  <div class="bottom-row">
+    <table class="paid-table">
+      <tr>
+        <td class="paid-lbl" rowspan="2">Paid By -</td>
+        <td class="paid-val">Cheque</td>
+      </tr>
+      <tr>
+        <td class="paid-val">Cash</td>
+      </tr>
+    </table>
+
+    <table class="totals-table">
+      <tr>
+        <td class="t-lbl">SUBTOTAL</td>
+        <td class="t-sym">$</td>
+        <td class="t-val">${subtotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+      </tr>
+      <tr>
+        <td class="t-lbl">TAX RATE</td>
+        <td class="t-sym" colspan="2" style="text-align:right">${taxRate.toFixed(2)}%</td>
+      </tr>
+      <tr>
+        <td class="t-lbl">SALES TAX</td>
+        <td class="t-sym">$</td>
+        <td class="t-val">${salesTax.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+      </tr>
+      <tr>
+        <td class="t-lbl">DELIVERY FEE</td>
+        <td class="t-sym">${delivery > 0 ? '$' : ''}</td>
+        <td class="t-val">${delivery > 0 ? delivery.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-'}</td>
+      </tr>
+      <tr class="t-total">
+        <td class="t-lbl">TOTAL</td>
+        <td class="t-sym">$</td>
+        <td class="t-val">${total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="thankyou">THANK YOU FOR YOUR BUSINESS!</div>
+  <script>window.onload = function() { window.print(); window.onafterprint = function() { window.close(); }; };<\/script>
+</body>
+</html>`;
+
+      const printWin = window.open('', '_blank', 'width=900,height=1200');
+      if (!printWin) { showToast('Please allow pop-ups for this site to download PDF', 'err'); return; }
+      printWin.document.write(printHTML);
+      printWin.document.close();
+    }
+
+    async function saveInvoiceMaker() {
+      const billTo = (document.getElementById('im_billto').value || '').trim();
+      const invNum = (document.getElementById('im_invnum').value || '').trim();
+      const dateVal = document.getElementById('im_date').value || '';
+      const paidBy = document.getElementById('im_paidby').value;
+      const taxRate = parseFloat(document.getElementById('im_taxrate').value) || 0;
+      const delivery = parseFloat(document.getElementById('im_delivery').value) || 0;
+
+      if (!billTo) { showToast('Please enter a Bill To name', 'err'); return; }
+      if (!invNum) { showToast('Please enter an Invoice #', 'err'); return; }
+
+      // Collect line items
+      const lineItems = [];
+      document.querySelectorAll('#im_itemBody tr').forEach(tr => {
+        const inputs = tr.querySelectorAll('input');
+        const qty = parseFloat(inputs[0].value) || 0;
+        const desc = inputs[1].value.trim();
+        const price = parseFloat(inputs[2].value) || 0;
+        if (!desc && qty === 0 && price === 0) return; // skip empty rows
+        lineItems.push({
+          description: desc,
+          quantity: qty,
+          unitPrice: price,
+          ourPrice: productMap[(desc || '').toUpperCase()] || 0,
+          amount: +(qty * price).toFixed(2)
+        });
+      });
+
+      const subtotal = lineItems.reduce((s, l) => s + l.amount, 0);
+      const tax = +(subtotal * taxRate / 100).toFixed(2);
+      const total = +(subtotal + tax + delivery).toFixed(2);
+
+      // Parse date
+      let year = null, month = null, monthName = null, quarter = null;
+      if (dateVal) {
+        const d = new Date(dateVal + 'T00:00:00');
+        year = d.getFullYear();
+        month = d.getMonth() + 1;
+        const MNAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+        monthName = MNAMES[month - 1];
+        quarter = month <= 3 ? 'Q1' : month <= 6 ? 'Q2' : month <= 9 ? 'Q3' : 'Q4';
+      }
+
+      const inv = {
+        id: 'im_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
+        fileName: `Invoice_${invNum}_${billTo.replace(/\s+/g, '_')}.pdf`,
+        invoiceNumber: invNum,
+        clientName: billTo,
+        date: dateVal,
+        year, month, monthName, quarter,
+        subtotal: +subtotal.toFixed(2),
+        tax,
+        total,
+        currency: 'CAD',
+        paymentMethod: paidBy,
+        hstNumber: '764238879 RT0001',
+        lineItems,
+        category: 'General',
+        rawTextPreview: `Invoice Maker — ${billTo} — ${invNum}`,
+        source: 'invoice-maker'
+      };
+
+      try {
+        const r = await fetch('/api/invoices', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(inv)
+        });
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.error || 'Save failed');
+        invoices.unshift(inv);
+        refresh();
+        showToast(`✅ Invoice #${invNum} saved successfully!`, 'ok');
+        imInitialized = false; // Allow reset for new invoice
+        resetInvoiceMaker();
+      } catch (e) {
+        showToast('Error saving: ' + e.message, 'err');
+      }
+    }
+
+    function resetInvoiceMaker() {
+      imInitialized = false;
+      document.getElementById('im_billto').value = '';
+      document.getElementById('im_paidby').value = 'Cheque';
+      document.getElementById('im_taxrate').value = '13';
+      document.getElementById('im_delivery').value = '0';
+      document.getElementById('im_itemBody').innerHTML = '';
+      document.getElementById('im_subtotal').textContent = '$ 0.00';
+      document.getElementById('im_salestax').textContent = '$ 0.00';
+      document.getElementById('im_total').textContent = '$ 0.00';
+      initInvoiceMaker();
     }
 
     loadData();
